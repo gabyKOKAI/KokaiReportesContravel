@@ -1,0 +1,5 @@
+include LICENSE
+include README.rst
+recursive-include reportesVC/static *
+recursive-include reportesVC/templates *
+recursive-include docs *

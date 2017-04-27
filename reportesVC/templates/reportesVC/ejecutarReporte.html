@@ -1,0 +1,65 @@
+{% extends 'reportesVC/base.html' %}
+{% load bootstrap3 %}
+
+{% block tituloPagina %}
+    Página de ejecucion de reporte de {{tipo_nombre}}
+{% endblock %}
+
+{% block HeaderPagina %}
+    Página de ejecucion de reporte de {{tipo_nombre}}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-11">
+                <form action="{{ request.build_absolute_uri }}subirArchivo/" method="post" enctype="multipart/form-data" class="form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-6 text-right">
+                            <input type="file" name="myfile">
+                        </div>
+                        <div class="col-sm-6 text-left">
+                            <button class="submitForm" type="submit">{% bootstrap_icon "star" %}Sube Archivo</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if status != "Nuevo"%}
+                    <br>
+                    <form action="{% url 'reportesVC:creaReporte' tipoNombre=tipo_nombre status='ejecutando'%}" method="post">
+                        {% csrf_token %}
+                        {% for variable in variables_ultimo_reporte %}
+                            {% if variable.id != 3%}
+                                <div class="row">
+                                    <div class="col-sm-12 text-left">
+                                        <label class="labelForm" for="{{ variable.valor }}">{{ variable.nombre }}:</label>
+                                    <!--/div>
+                                    <div class="col-sm-9 text-left"-->
+                                        {% if variable.editable == 1%}
+                                            <input class="textForm" type="text" name="{{ variable.id }}_{{variable.nombre}}" id="{{ variable.id }}" value="{{ variable.valor }}" />
+                                        {% else %}
+                                            <label class="labelTextForm" name="{{ variable.id }}_{{variable.nombre}}" id="{{ variable.id }}">{{ variable.valor }}</label>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                    <!--input type="text" name="{{variable.nombre}}" id="variable{{ forloop.counter }}" value="{{ variable.id }}" /-->
+                            {% else %}
+                                <!--label for="{{ variable.valor }}">{{ variable.nombre }}</label-->
+                                <input type="hidden" name="{{ variable.id }}_{{variable.nombre}}" id="{{ variable.id }}" value="{{ tipo_valor }}" />
+                                <!--input type="text" name="{{variable.nombre}}" id="variable{{ forloop.counter }}" value="{{ variable.id }}" /-->
+                                <!--br /-->
+                            {% endif %}
+                        {% endfor %}
+
+                        <div class="row">
+                            <div class="col-sm-6 text-right"></div>
+                            <div class="col-sm-6 text-left">
+                                <button class="submitForm" type="submit">{% bootstrap_icon "star" %} Ejecuta Reporte</button>
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}
+      </div>
+    </div>
+{% endblock %}
