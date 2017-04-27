@@ -1,0 +1,27 @@
+{% extends 'reportesVC/base.html' %}
+{% block tituloPagina %}
+    Bienvenido a la pagina de reportes de Contravel
+{% endblock %}
+
+{% block HeaderPagina %}
+    Bienvenido a la pagina de reportes de Contravel
+{% endblock %}
+
+{% block content %}
+    <div class="center">
+        <p>Esta disponible la creación de reportes:</p>
+        {% if tipos_reportes %}
+            {% with status="algo"%}
+            <ul class="inicio">
+            {% for tipo in tipos_reportes %}
+                <!--li><a href="/reportesVC/{{ tipo.nombre }}/">{{ tipo.nombre }}</a></li-->
+                <li><a href="{% url 'reportesVC:reportes' tipoNombre=tipo.nombre status='Nuevo'%}">{{ tipo.nombre }}</a></li>
+
+            {% endfor %}
+            {% endwith %}
+            </ul>
+        {% else %}
+            <p>No hay tipos de reportes disponibles.</p>
+        {% endif %}
+    </div>
+{% endblock %}

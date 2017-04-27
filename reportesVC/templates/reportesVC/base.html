@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+{% load static %}
+{% load menu %}
+
+{# Load the tag library #}
+{% load bootstrap3 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_javascript %}
+{% bootstrap_css %}
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block tituloPagina %}{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="{% static 'reportesVC/style.css' %}" />
+
+</head>
+<body>
+    {% block menuu %}
+        {% generate_menu %}
+        {% with menu=menus.main %}
+            {% include "bootstrap-navbar.html" %}
+        {% endwith %}
+    {% endblock %}
+
+    <h1 class="tituloPaginas">{% block HeaderPagina %}{% endblock %}</h1>
+
+    {# Display django.contrib.messages as Bootstrap alerts #}
+    {% bootstrap_javascript jquery=1 %}
+    {% bootstrap_messages %}
+
+    {% block mensajes %}
+        {% if status == "Subido" %}
+            {% bootstrap_alert "El archivo se subio con exito!!!" alert_type='success' %}
+        {% endif %}
+
+        {# if messages #}
+        <!--p>Verificar lo siguiente:</p>
+        <ul class="messages">
+            {% for message in messages %}
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% bootstrap_alert "{{message}}" alert_type='error' %}
+            {% endfor %}
+        </ul-->
+        {# endif #}
+    {% endblock %}
+
+    {% block content %}{% endblock %}
+
+</body>

@@ -1,0 +1,50 @@
+{% extends 'reportesVC/base.html' %}
+{% load bootstrap3 %}
+
+{% block tituloPagina %}
+    Página del reporte  de {{object.tipoReporte.nombre}}
+{% endblock %}
+
+{% block HeaderPagina %}
+    Página del reporte  de {{object.tipoReporte.nombre}}
+{% endblock %}
+
+{% block content %}
+	{% if object.id == None %}
+		<p>No se pudo ejecutar el reporte con la siguiente informacion:</p>
+		<ul>
+			<li>Tipo Reporte: {{ object.tipoReporte.nombre }}</li>
+			<li>Semana: {{ object.semana }}</li>
+			<li>Año Periodo: {{ object.anoPeriodo }}</li>
+			<li>Mes Periodo: {{ object.mesPeriodo.nombre }}</li>
+			<li>Dia Inicia Periodo: {{ object.diaIniciaPeriodo}}</li>
+			<li>Dia Fin Periodo: {{ object.diaFinPeriodo}}</li>
+			<li>Fecha Ejecución: {{ object.fechaEjecucion}}</li>
+			<li>Estatus: {{ object.estatus}}</li>
+			<li>Nombre Archivo: {{ object.nombreArchivo}}</li>
+			<li>Ruta Archivo: {{ object.rutaArchivo}}</li>
+			<li>Nombre Zip: {{ object.nombreZip}}</li>		
+		</ul>
+	{% else %}
+		<p>Se ejecuto el reporte con la siguiente informacion:</p>
+		<ul>
+			<li>ID: {{ object.id }}</li>
+			<li>Tipo Reporte: {{ object.tipoReporte.nombre }}</li>
+			<li>Semana: {{ object.semana }}</li>
+			<li>Año Periodo: {{ object.anoPeriodo }}</li>
+			<li>Mes Periodo: {{ object.mesPeriodo.nombre }}</li>
+			<li>Dia Inicia Periodo: {{ object.diaIniciaPeriodo}}</li>
+			<li>Dia Fin Periodo: {{ object.diaFinPeriodo}}</li>
+			<li>Fecha Ejecución: {{ object.fechaEjecucion}}</li>
+			<li>Estatus: {{ object.estatus}}</li>
+			<li>Nombre Archivo: {{ object.nombreArchivo}}</li>
+			<li>Ruta Archivo: {{ object.rutaArchivo}}</li>
+			<li>Nombre Zip: {{ object.nombreZip}}</li>		
+		</ul>
+		
+		<form action="{{ request.build_absolute_uri }}descargarZip/" method="post" enctype="multipart/form-data">
+			{% csrf_token %}
+			<button class="submitForm" type="submit">{% bootstrap_icon "star" %}Descarga Archivo</button>
+		</form>
+	{% endif %}
+{% endblock %}
