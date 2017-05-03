@@ -133,7 +133,7 @@ def subirArchivo(request, tipoNombre, status):
     ##tipo = TipoReporte.objects.get(nombre=tipoNombre)
     if request.method == 'POST':
         fileName = str(request.FILES["myfile"])
-        rutaArchivo = "reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
+        rutaArchivo = "/root/vep35/reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
         handle_uploaded_file(request.FILES["myfile"], fileName, rutaArchivo)
         status = "Subido"
         vURfileName = VariablesUltimoReporte.objects.get(pk=7)
