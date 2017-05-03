@@ -44,7 +44,7 @@ class EjecucionReporte(models.Model):
     fechaEjecucion = models.DateTimeField('Fecha de ejecucion')
     estatus = models.CharField(max_length=10, default='')
     nombreArchivo = models.CharField(max_length=50,default='')
-    rutaArchivo = models.CharField(max_length=50,default='')
+    rutaArchivo = models.CharField(max_length=100,default='')
     nombreZip = models.CharField(max_length=50,default='')
 
 class Document(models.Model):
