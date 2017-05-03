@@ -84,7 +84,10 @@ def creaReporte(request, tipoNombre, status):
     reporte.fechaEjecucion=timezone.now()
     reporte.estatus = "Iniciandos"
     reporte.nombreArchivo = variables['NOMBRE ARCHIVO']
-    reporte.rutaArchivo = "reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
+    ##servidor
+    reporte.rutaArchivo = "/root/vep35/reportesContravel/reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
+    ##desarrollo
+    ##reporte.rutaArchivo = "reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
     reporte.save()
 
     ###Por último, ejecuto reporte
