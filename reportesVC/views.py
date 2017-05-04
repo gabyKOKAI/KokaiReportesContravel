@@ -85,7 +85,7 @@ def creaReporte(request, tipoNombre, status):
     reporte.estatus = "Iniciandos"
     reporte.nombreArchivo = variables['NOMBRE ARCHIVO']
     ##servidor
-    reporte.rutaArchivo = "/local/kokaiweb/vep35/reportesContravel/reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
+    reporte.rutaArchivo = "/home/kokaiweb/vep35/reportesContravel/reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
     ##desarrollo
     ##reporte.rutaArchivo = "reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
     reporte.save()
@@ -137,7 +137,7 @@ def subirArchivo(request, tipoNombre, status):
     if request.method == 'POST':
         fileName = str(request.FILES["myfile"])
         ##servidor
-        rutaArchivo = "/local/kokaiweb/vep35/reportesContravel/reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
+        rutaArchivo = "/home/kokaiweb/vep35/reportesContravel/reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
         ##desarrollo
         ##rutaArchivo = "reportesContravel/reportesVC/archivos/" + tipoNombre + "/"
         handle_uploaded_file(request.FILES["myfile"], fileName, rutaArchivo)
