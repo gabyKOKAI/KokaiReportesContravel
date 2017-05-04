@@ -73,6 +73,8 @@ def creaReporte(request, tipoNombre, status):
         var.save()
         variables[var.nombre] = var.valor
 
+    print(variables)
+    
     ###Despues guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
     reporte = EjecucionReporte()
     reporte.tipoReporte=TipoReporte.objects.get(pk=variables["TIPO REPORTE"])
