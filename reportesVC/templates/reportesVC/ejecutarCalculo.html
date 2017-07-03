@@ -1,0 +1,97 @@
+{% extends 'reportesVC/base.html' %}
+{% load bootstrap3 %}
+
+{% block tituloPagina %}
+    Página de ejecucion de calculos de {{tipo_nombre_largo}}
+{% endblock %}
+
+{% block HeaderPagina %}
+    Página de ejecucion de calculos de {{tipo_nombre_largo}}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-11">
+            <p>Subir o sustituir los archivos de configuración:</p>
+                <form action="{{ request.build_absolute_uri }}subirArchivo/" method="post" enctype="multipart/form-data" class="form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-12 text-left">
+                        <ul class="listaArchivos">
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoExcepciones" title="Text to show">Archivo Configuraciones Clientes y Aerolineas.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesConfCliAL');">+/-</span>
+                                <div class="detalles" id="detallesConfCliAL">Las columnas deben llevar este orden: [CLIENTE | LINEA AEREA | COMISION | NOTA]</div>
+                            </li>
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoMex">Archivo con Codigos IATA de Mexico.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesMex');">+/-</span>
+                                <div class="detalles" id="detallesMex">Las columnas deben llevar este orden: [CODIGO IATA | AEROPUERTO | ESTADO]</div>
+                            </li>
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoEua">Archivo con Codigos IATA de Estados Unidos.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesEua');">+/-</span>
+                                <div class="detalles" id="detallesEua">Las columnas deben llevar este orden: [CODIGO IATA | AEROPUERTO | ESTADO]</div>
+                            </li>
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoCan">Archivo con Codigos IATA de Canada.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesCan');">+/-</span>
+                                <div class="detalles" id="detallesCan">Las columnas deben llevar este orden: [CODIGO IATA | AEROPUERTO | ESTADO]</div>
+                            </li>
+
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoCsv" checked="checked">Archivo de trabajo de la semana.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesArchivo');">+/-</span>
+                                <div class="detalles" id="detallesArchivo">Detalles Archivo CSV</div>
+                            </li>
+
+                        </ul>
+                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 text-right">
+                            <input type="file" name="myfile">
+                        </div>
+                        <div class="col-sm-6 text-left">
+                            <button class="submitForm" type="submit" name="subeArchivo">{% bootstrap_icon "star" %}Sube Archivo</button>
+                            <button class="submitForm" type="submit" name="bajaArchivo">{% bootstrap_icon "star" %}Baja Archivo</button>
+                        </div>
+                    </div>
+                </form>
+
+
+                {% if status != "Nuevo" and status != "SubidoConf" and status != "Error" %}
+                    <br>
+                    <form action="{% url 'reportesVC:ejecutaComisiones' tipoNombre=tipo_nombre status='ejecutando'%}" method="post">
+                        {% csrf_token %}
+                        {% for variable in variables_ultimo_reporte %}
+                            {% if variable.id != 3%}
+                                <div class="row">
+                                    <div class="col-sm-12 text-left">
+                                        <label class="labelForm" for="{{ variable.valor }}">{{ variable.nombre }}:</label>
+                                    <!--/div>
+                                    <div class="col-sm-9 text-left"-->
+                                        {% if variable.editable == 1%}
+                                            <input class="textForm" type="text" name="{{ variable.id }}_{{variable.nombre}}" id="{{ variable.id }}" value="{{ variable.valor }}" />
+                                        {% else %}
+                                            <label class="labelTextForm" name="{{ variable.id }}_{{variable.nombre}}" id="{{ variable.id }}">{{ variable.valor }}</label>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                    <!--input type="text" name="{{variable.nombre}}" id="variable{{ forloop.counter }}" value="{{ variable.id }}" /-->
+                            {% else %}
+                                <!--label for="{{ tipo_valor }}">{{ variable.nombre }}</label-->
+
+                                <input type="hidden" name="{{ variable.id }}_{{variable.nombre}}" id="{{ variable.id }}" value="{{ tipo_valor }}" />
+                                <!--input type="text" name="{{variable.nombre}}" id="variable{{ forloop.counter }}" value="{{ variable.id }}" /-->
+                                <!--br /-->
+                            {% endif %}
+                        {% endfor %}
+
+                        <div class="row">
+                            <div class="col-sm-6 text-right"></div>
+                            <div class="col-sm-6 text-left">
+                                <button class="submitForm" type="submit">{% bootstrap_icon "star" %} Ejecuta Reporte</button>
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}
+      </div>
+    </div>
+{% endblock %}

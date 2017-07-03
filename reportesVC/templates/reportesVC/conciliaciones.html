@@ -2,11 +2,11 @@
 {% load bootstrap3 %}
 
 {% block tituloPagina %}
-    Página de ejecucion de reporte de {{tipo_nombre_largo}}
+    Página de ejecucion de conciliacion de {{tipo_nombre}}
 {% endblock %}
 
 {% block HeaderPagina %}
-    Página de ejecucion de reporte de {{tipo_nombre_largo}}
+    Página de ejecucion de conciliacion de {{tipo_nombre}}
 {% endblock %}
 
 {% block content %}
@@ -25,7 +25,7 @@
                     </div>
                 </form>
 
-                {% if status != "Nuevo" and status != "Error"%}
+                {% if status != "Nuevo"%}
                     <br>
                     <form action="{% url 'reportesVC:creaReporte' tipoNombre=tipo_nombre status='ejecutando'%}" method="post">
                         {% csrf_token %}
@@ -53,38 +53,7 @@
                         {% endfor %}
 
                         <div class="row">
-                            <div class="col-sm-6 text-left">
-                                <ul class="listaArchivos">
-                            <li><input type="radio" name="CBtipoReporte" value="reporteViejo" checked="checked"> Formato Anterior
-                                <span class="masDetalle" onclick="toggle_visibility('detallesViejo');">+/-</span>
-                                <div class="detalles" id="detallesViejo">
-                                    {% if tipo_valor == 1%}
-                                        <p>Las columnas deben llevar el siguiente orden:</p>
-                                        <p>[CLIENTE | NOMBRE | SERIE | FACTURA | FECHA | PASAJERO | BOLETO | RUTA | FORMA DE PAGO | TARIFA* | IVA* | TUA* | TOTAL*]</p>
-                                        <p>Los * indican formato de numero.</p>
-                                    {% endif %}
-                                    {% if tipo_valor == 2%}
-                                        <p>Las columnas deben llevar el siguiente orden:</p>
-                                        <p>[CLIENTE | NOMBRE | SERIE | FACTURA | FECHA | PASAJERO | LINEA AEREA | BOLETO | RUTA |  TARIFA* | %* | COM* | IVA* | TOTAL* | CLASES | AEROLINEAS]</p>
-                                        <p>Los * indican formato de numero.</p>
-                                    {% endif %}
-                                </div>
-                            </li>
-                            <li><input type="radio" name="CBtipoReporte" value="reporteNuevo"> Nuevo Formato
-                                <span class="masDetalle" onclick="toggle_visibility('detallesNuevo');">+/-</span>
-                                <div class="detalles" id="detallesNuevo">
-                                    {% if tipo_valor == 1%}
-                                        Solo existe formato Anterior, ver instrucciones de formato anterior
-                                    {% endif %}
-                                    {% if tipo_valor == 2%}
-                                        <p>Las columnas deben llevar el siguiente orden:</p>
-                                        <p>[CLIENTE | NOMBRE | BOLETO | SERIE | FACTURA | FECHA | PASAJERO | LINEA AEREA | AEROLINEAS | INTERLINEAL | PAIS ORIGEN |  CIUDAD ORIGEN | PAIS DESTINO | CIUDAD DESTINO | RUTA | CODIGO COMPARTIDO | CLASES | TARIFA BASE* | % COMISION BSP | COMISION BSP* | % COMISION | COMISION* | IVA* | TOTAL*]</p>
-                                        <p>Los * indican formato de numero.</p>
-                                    {% endif %}
-                                </div>
-                            </li>
-                        </ul>
-                            </div>
+                            <div class="col-sm-6 text-right"></div>
                             <div class="col-sm-6 text-left">
                                 <button class="submitForm" type="submit">{% bootstrap_icon "star" %} Ejecuta Reporte</button>
                             </div>

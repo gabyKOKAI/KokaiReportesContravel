@@ -2,11 +2,11 @@
 {% load bootstrap3 %}
 
 {% block tituloPagina %}
-    Página del reporte  de {{object.tipoReporte.nombreLargo}}
+    Página del reporte calculo de {{object.tipoReporte.nombreLargo}}
 {% endblock %}
 
 {% block HeaderPagina %}
-    Página del reporte  de {{object.tipoReporte.nombreLargo}}
+    Página del reporte de calculo de {{object.tipoReporte.nombreLargo}}
 {% endblock %}
 
 {% block content %}
@@ -26,7 +26,7 @@
 		<li>Nombre Zip: {{ object.nombreZip}}</li>
 	</ul>
 
-	<form action="{{ request.build_absolute_uri }}descargarZip/" method="post" enctype="multipart/form-data">
+	<form action="{{ request.build_absolute_uri }}descargarFile/" method="post" enctype="multipart/form-data">
 		{% csrf_token %}
 		<button class="submitForm" type="submit">{% bootstrap_icon "star" %}Descarga Archivo</button>
 	</form>
