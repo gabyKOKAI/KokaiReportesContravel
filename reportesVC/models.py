@@ -15,9 +15,10 @@ class Choice(models.Model):
 '''
 class TipoReporte(models.Model):
     def __str__(self):
-        return str(self.id) + ": " + self.nombre
+        return str(self.id) + ": " + self.nombre + " - " + self.nombreLargo
     ##comisiones o ventas
     nombre = models.CharField(max_length=20)
+    nombreLargo = models.CharField(max_length=20,default='')
 
 class MesReporte(models.Model):
     def __str__(self):

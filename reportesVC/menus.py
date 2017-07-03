@@ -3,16 +3,35 @@ from django.urls import reverse
 
 # Define children for reports
 reportes_children = (
-    MenuItem("Reportes Comisiones",
-             reverse('reportesVC:reportes', kwargs={'tipoNombre': 'Comisiones', 'status': 'Nuevo'}),
+    MenuItem("Comisiones",
+             reverse('reportesVC:reportes', kwargs={'tipoNombre': 'ComisionesPdf', 'status': 'Nuevo'}),
              weight=20,
              icon="report",
              separator=True),
-    MenuItem("Reportes Ventas",
-             reverse('reportesVC:reportes', kwargs={'tipoNombre': 'Ventas', 'status': 'Nuevo'}),
+    MenuItem("Ventas",
+             reverse('reportesVC:reportes', kwargs={'tipoNombre': 'VentasPdf', 'status': 'Nuevo'}),
              weight=20,
              icon="report",
              separator=True),
+)
+
+# Define children for calculos
+calculos_children = (
+    MenuItem("Comisiones",
+             reverse('reportesVC:calculos', kwargs={'tipoNombre': 'calComisiones', 'status': 'Nuevo'}),
+             weight=20,
+             icon="report",
+             separator=True),
+)
+
+# Define children for conciliaciones
+conciliaciones_children = (
+    MenuItem("Bancos",
+             reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': 'concBancos', 'status': 'Nuevo'}),
+             weight=20,
+             icon="report",
+             separator=True),
+
 )
 
 # Add two items to our main menu
@@ -26,6 +45,20 @@ Menu.add_item("main", MenuItem("Reportes",
                                "#",
                                weight=20,
                                children=reportes_children,
+                               icon="report",
+                               separator=True))
+
+Menu.add_item("main", MenuItem("Calculos",
+                               "#",
+                               weight=20,
+                               children=calculos_children,
+                               icon="report",
+                               separator=True))
+
+Menu.add_item("main", MenuItem("Conciliaciones",
+                               "#",
+                               weight=20,
+                               children=conciliaciones_children,
                                icon="report",
                                separator=True))
 

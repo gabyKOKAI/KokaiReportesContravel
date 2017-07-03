@@ -32,21 +32,15 @@
     {% bootstrap_javascript jquery=1 %}
     {% bootstrap_messages %}
 
-    {% block mensajes %}
-        {% if status == "Subido" %}
-            {% bootstrap_alert "El archivo se subio con exito!!!" alert_type='success' %}
-        {% endif %}
-
-        {# if messages #}
-        <!--p>Verificar lo siguiente:</p>
-        <ul class="messages">
-            {% for message in messages %}
-            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% bootstrap_alert "{{message}}" alert_type='error' %}
-            {% endfor %}
-        </ul-->
-        {# endif #}
-    {% endblock %}
+    <script type="text/javascript">
+   function toggle_visibility(id) {
+       var e = document.getElementById(id);
+       if(e.style.display == 'block')
+          e.style.display = 'none';
+       else
+          e.style.display = 'block';
+   }
+    </script>
 
     {% block content %}{% endblock %}
 
