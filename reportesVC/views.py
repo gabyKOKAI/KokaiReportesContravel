@@ -18,9 +18,10 @@ from .models import TipoReporte, EjecucionReporte, VariablesUltimoReporte, MesRe
 
 ### Global Variables
 ###servidor
-##dirArchivos =  "/home/kokaiweb/vep35/reportesContravel/reportesContravel/reportesVC/archivos/"
+dirArchivos =  "/home/kokaiweb/vep35/reportesContravel/reportesContravel/reportesVC/archivos/"
+
 ###desarrollo
-dirArchivos = "reportesContravel/reportesVC/archivos/"
+##dirArchivos = "reportesContravel/reportesVC/archivos/"
 
 # Create your views here.
 
