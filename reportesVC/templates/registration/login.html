@@ -1,0 +1,55 @@
+{% extends 'reportesVC/base.html' %}
+{% load bootstrap3 %}
+
+
+{% block title %}
+<h2>Login</h2>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-sm-3 text-left">
+        </div>
+        <div class="col-sm-6 text-center">
+            {% if form.errors1 %}
+                <p>Your username and password didn't match. Please try again.</p>
+            {% endif %}
+
+            {% if next %}
+                {% if user.is_authenticated %}
+                <p>Su cuenta no tiene acceso a esta página. Para continuar
+                porfavor ingrese con una cuenta que si tenga acceso.</p>
+                {% else %}
+                <p>Por favor ingrese con su cuenta para poder ver esta página.</p>
+                {% endif %}
+            {% endif %}
+        </div>
+        <div class="col-sm-3 text-left">
+        </div>
+    </div>
+
+<form action="{% url 'auth:login' %}" method="post" class="form">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-sm-3 text-left">
+        </div>
+        <div class="col-sm-6 text-right">
+            {% bootstrap_form form layout='inline' %}
+            {% buttons %}
+                <button type="submit" class="btn btn-primary">
+                    {% bootstrap_icon "user" %} Login
+                </button>
+            {% endbuttons %}
+        </div>
+        <div class="col-sm-3 text-left">
+        </div>
+    </div>
+
+
+
+    <!--a href="{% url 'auth:password_reset' %}"><p>Lost password?</p></a-->
+</form>
+
+
+{% endblock %}

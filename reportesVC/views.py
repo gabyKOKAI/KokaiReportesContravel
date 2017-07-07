@@ -2,6 +2,7 @@ from os import path, mkdir
 
 from ReportesPDFContravel import ReportesPDFContravel
 from ComisionesContravel import ComisionesContravel
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse  ## eventualmente lo podremos quitar
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -12,13 +13,14 @@ from django.contrib import messages
 
 from .models import TipoReporte, EjecucionReporte, VariablesUltimoReporte, MesReporte
 
-
 ##from django.http import Http404
 ##from django.template import loader
 
 ### Global Variables
 ###servidor
-##dirArchivos =  "/home/kokaiweb/vep35/reportesContravel/reportesContravel/reportesVC/archivos/"
+##dirArchivos = "/home/kokaiweb/vep35/reportesContravel/reportesContravel/reportesVC/archivos/"
+
+
 ###desarrollo
 dirArchivos = "reportesContravel/reportesVC/archivos/"
 
@@ -28,9 +30,12 @@ class ReporteView(generic.DetailView):
     model = EjecucionReporte
     template_name = 'reportesVC/detalleReporte.html'
 
+
 class CalculoView(generic.DetailView):
     model = EjecucionReporte
     template_name = 'reportesVC/detalleCalculo.html'
+
+
 '''
 ### Used before
 def index0(request):
@@ -43,6 +48,7 @@ def index0(request):
     return HttpResponse(template.render(context, request))
 '''
 
+@login_required
 def index(request):
     tiposReportes = TipoReporte.objects.order_by('-id')[:5]
     context = {
@@ -50,21 +56,32 @@ def index(request):
     }
     return render(request, 'reportesVC/index.html', context)
 
+##@login_required
+@permission_required('reportesVC.can_run_Report')
 def reportes(request, tipoNombre, status):
     tipo = TipoReporte.objects.get(nombre=tipoNombre)
     variablesUltimoReporte = VariablesUltimoReporte.objects.all()
-    return render(request, 'reportesVC/ejecutarReporte.html', {'tipo_nombre':tipoNombre, 'tipo_valor':tipo.id, 'tipo_nombre_largo':tipo.nombreLargo, 'variables_ultimo_reporte':variablesUltimoReporte, 'status':status})
+    return render(request, 'reportesVC/ejecutarReporte.html',
+                  {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
+                   'variables_ultimo_reporte': variablesUltimoReporte, 'status': status})
 
-
+@login_required
+@permission_required('reportesVC.can_run_Calculos')
 def calculos(request, tipoNombre, status):
     tipo = TipoReporte.objects.get(nombre=tipoNombre)
     variablesUltimoReporte = VariablesUltimoReporte.objects.all()
-    return render(request, 'reportesVC/ejecutarCalculo.html', {'tipo_nombre':tipoNombre, 'tipo_valor':tipo.id, 'tipo_nombre_largo':tipo.nombreLargo, 'variables_ultimo_reporte':variablesUltimoReporte, 'status':status})
+    return render(request, 'reportesVC/ejecutarCalculo.html',
+                  {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
+                   'variables_ultimo_reporte': variablesUltimoReporte, 'status': status})
 
+@login_required
+@permission_required('reportesVC.can_run_Conciliacion')
 def conciliaciones(request, tipoNombre, status):
     tipo = TipoReporte.objects.get(nombre=tipoNombre)
     variablesUltimoReporte = VariablesUltimoReporte.objects.all()
-    return render(request, 'reportesVC/conciliaciones.html', {'tipo_nombre':tipoNombre, 'tipo_valor':tipo.id, 'tipo_nombre_largo':tipo.nombreLargo, 'variables_ultimo_reporte':variablesUltimoReporte, 'status':status})
+    return render(request, 'reportesVC/conciliaciones.html',
+                  {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
+                   'variables_ultimo_reporte': variablesUltimoReporte, 'status': status})
 
 
 '''
@@ -78,10 +95,12 @@ def reporteVentas0(request, reporte_id):
     ###return HttpResponse("Página del reporte de Ventas: " + reporte_id)
 '''
 
+@login_required
 def reporte(request, tipoNombre, reporteId):
-    reporte = get_object_or_404(EjecucionReporte, pk=reporteId) ##tambien existe get_list_or_404() 
+    reporte = get_object_or_404(EjecucionReporte, pk=reporteId)  ##tambien existe get_list_or_404()
     return render(request, 'reportesVC/detalleReporte.html', {'reporte': reporte})
     ###return HttpResponse("Página del reporte de Ventas: " + reporte_id)
+
 
 ### actualiza valores en table de variebles
 def actualizaValores(request):
@@ -96,6 +115,7 @@ def actualizaValores(request):
 
     ##print(variables)
     return variables
+
 
 ### Guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
 def guardaHistorial(variables, tipoNombre):
@@ -113,6 +133,7 @@ def guardaHistorial(variables, tipoNombre):
     reporte.save()
     return reporte
 
+
 ### Get Error and Success messages
 def getMessages(request, mensajes):
     for mensajesErr in sorted(mensajes.keys()):
@@ -127,17 +148,21 @@ def getMessages(request, mensajes):
         if mensajes[mensajesErr]["tipo"] == "error":
             messages.error(request, mensajes[mensajesErr]["mensaje"])
 
+
+@login_required
 def creaReporte(request, tipoNombre, status):
     variables = {}
 
     ###Primero guardo valores en la tabla de variables
     variables = actualizaValores(request)
-    
+
     ###Despues guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
     reporte = guardaHistorial(variables, tipoNombre)
 
     ###Por último, ejecuto reporte
-    rep = ReportesPDFContravel(reporte.semana, reporte.anoPeriodo, reporte.mesPeriodo.nombre, reporte.diaIniciaPeriodo, reporte.diaFinPeriodo, reporte.nombreArchivo, reporte.rutaArchivo, reporte.tipoReporte.nombre)
+    rep = ReportesPDFContravel(reporte.semana, reporte.anoPeriodo, reporte.mesPeriodo.nombre, reporte.diaIniciaPeriodo,
+                               reporte.diaFinPeriodo, reporte.nombreArchivo, reporte.rutaArchivo,
+                               reporte.tipoReporte.nombre)
 
     mylist = request.POST.getlist('CBtipoReporte')
     if 'reporteNuevo' in mylist:
@@ -147,15 +172,15 @@ def creaReporte(request, tipoNombre, status):
 
     ###Actualizo status del historial de reportes
     if cant > 0:
-       reporte.estatus = "Creado" + str(cant)
-       reporte.save()
+        reporte.estatus = "Creado" + str(cant)
+        reporte.save()
 
     ###Creo Zip y Actualizo linea a ejecucion reporte, con informacion del zip
     reporte.nombreZip = rep.createZip()
     reporte.save()
 
     ##print(rep.mensajesErr)
-    if len(rep.mensajesErr)>0:
+    if len(rep.mensajesErr) > 0:
         getMessages(request, rep.mensajesErr)
         return HttpResponseRedirect(reverse('reportesVC:reportes', kwargs={'tipoNombre': tipoNombre, 'status': status}))
 
@@ -169,40 +194,42 @@ def creaReporte(request, tipoNombre, status):
 def handle_uploaded_file(file, filename, rutaArchivo):
     if not path.exists(rutaArchivo):
         mkdir(rutaArchivo)
-
     with open(rutaArchivo + filename, 'wb+') as destination:
         for chunk in file.chunks():
             destination.write(chunk)
 
 def subirArch(request, fileName, tipoNombre):
     try:
-        if(fileName==""):
+        if (fileName == ""):
             fileName = str(request.FILES["myfile"])
         rutaArchivo = dirArchivos + tipoNombre + "/"
         handle_uploaded_file(request.FILES["myfile"], fileName, rutaArchivo)
         messages.success(request, "El archivo se subio con exito!!!")
     except Exception as err:
-        messages.error(request,"Favor de seleccionar un archivo para subir.")
+        messages.error(request, "Favor de seleccionar un archivo para subir.")
         fileName = "error"
     return fileName
 
 def actualizaFileName(fileName):
+    print(fileName)
     vURfileName = VariablesUltimoReporte.objects.get(pk=7)
     vURfileName.valor = fileName
     vURfileName.save()
     return
 
+@login_required
 def subirArchivo(request, tipoNombre, status):
     status = "Error"
     if request.method == 'POST':
-        fileName = subirArch(request,"",tipoNombre)
+        fileName = subirArch(request, "", tipoNombre)
         if fileName != "error":
             status = "Subido"
         else:
             status = "Error"
         actualizaFileName(fileName)
-    return HttpResponseRedirect(reverse('reportesVC:reportes', kwargs={'tipoNombre':tipoNombre, 'status':status}))
+    return HttpResponseRedirect(reverse('reportesVC:reportes', kwargs={'tipoNombre': tipoNombre, 'status': status}))
 
+@login_required
 def subirArchivoCal(request, tipoNombre, status):
     status = "Error"
     if request.method == 'POST':
@@ -217,7 +244,7 @@ def subirArchivoCal(request, tipoNombre, status):
         elif 'archivoCan' in mylist:
             newFileName = "CodIATACan.csv"
     if 'subeArchivo' in request.POST:
-        fileName = subirArch(request, newFileName , tipoNombre)
+        fileName = subirArch(request, newFileName, tipoNombre)
         if 'archivoCsv' in mylist:
             actualizaFileName(fileName)
             status = "Subido"
@@ -238,29 +265,34 @@ def subirArchivoCal(request, tipoNombre, status):
             return response
         else:
             messages.warning(request, "No es posible descargar este archivo, seleccione otra opción.")
-            return HttpResponseRedirect(reverse('reportesVC:calculos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+            return HttpResponseRedirect(
+                reverse('reportesVC:calculos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
     else:
         messages.warning(request, "No dio click en ninguna opción valida")
         return HttpResponseRedirect(reverse('reportesVC:calculos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
 
+@login_required
 def descargarZip(request, tipoNombre, pk):
     reporte = get_object_or_404(EjecucionReporte, pk=pk)
     filePath = reporte.rutaArchivo + reporte.nombreZip
-    fsock = open(filePath,"rb")
+    fsock = open(filePath, "rb")
     ##print("abrio")
     response = HttpResponse(fsock, content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename=' + reporte.tipoReporte.nombreLargo  + 'ReportesS' + reporte.semana + reporte.anoPeriodo + '.zip'
+    response[
+        'Content-Disposition'] = 'attachment; filename=' + reporte.tipoReporte.nombreLargo + 'ReportesS' + reporte.semana + reporte.anoPeriodo + '.zip'
     return response
 
+@login_required
 def descargarFile(request, tipoNombre, pk):
     reporte = get_object_or_404(EjecucionReporte, pk=pk)
     filePath = reporte.rutaArchivo + reporte.nombreZip
-    fsock = open(filePath,"rb")
+    fsock = open(filePath, "rb")
     ## print("abrio1")
     response = HttpResponse(fsock, content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=' + reporte.tipoReporte.nombreLargo + reporte.nombreZip
     return response
 
+@login_required
 def ejecutaComisiones(request, tipoNombre, status):
     variables = {}
 
@@ -271,8 +303,9 @@ def ejecutaComisiones(request, tipoNombre, status):
     reporte = guardaHistorial(variables, tipoNombre)
 
     ###Por último, ejecuto reporte
-    calCom = ComisionesContravel(reporte.semana, reporte.anoPeriodo, reporte.mesPeriodo.nombre, reporte.nombreArchivo, reporte.rutaArchivo,
-                               reporte.tipoReporte.nombre)
+    calCom = ComisionesContravel(reporte.semana, reporte.anoPeriodo, reporte.mesPeriodo.nombre, reporte.nombreArchivo,
+                                 reporte.rutaArchivo,
+                                 reporte.tipoReporte.nombre)
 
     nomArchivoNew = calCom.createReportPorComisiones()
 

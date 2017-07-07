@@ -20,7 +20,9 @@
                             <input type="file" name="myfile">
                         </div>
                         <div class="col-sm-6 text-left">
-                            <button class="submitForm" type="submit">{% bootstrap_icon "star" %}Sube Archivo</button>
+                            {% if perms.reportesVC.can_run_Report %}
+                                <button class="submitForm" type="submit">{% bootstrap_icon "star" %}Sube Archivo</button>
+                            {% endif %}
                         </div>
                     </div>
                 </form>
@@ -86,7 +88,9 @@
                         </ul>
                             </div>
                             <div class="col-sm-6 text-left">
-                                <button class="submitForm" type="submit">{% bootstrap_icon "star" %} Ejecuta Reporte</button>
+                                {% if perms.reportesVC.can_run_Report%}
+                                    <button class="submitForm" type="submit">{% bootstrap_icon "star" %} Ejecuta Reporte</button>
+                                {% endif %}
                             </div>
                         </div>
                     </form>
