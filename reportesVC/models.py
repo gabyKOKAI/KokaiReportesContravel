@@ -34,6 +34,8 @@ class VariablesUltimoReporte(models.Model):
     editable = models.BooleanField()
 
 class EjecucionReporte(models.Model):
+    class Meta:
+        permissions = (("can_run_Report", "Ejecuta Reporte"),("can_run_Calculos", "Ejecuta Calculos"),("can_run_Conciliacion", "Ejecuta Conciliacion"),)
     def __str__(self):
         return str(self.id) + ": "  + str(self.fechaEjecucion)
     tipoReporte = models.ForeignKey(TipoReporte, on_delete=models.CASCADE)

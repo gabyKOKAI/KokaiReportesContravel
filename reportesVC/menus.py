@@ -1,6 +1,16 @@
 from menu import Menu, MenuItem
 from django.urls import reverse
 
+# Define children for inicio
+inicio_children = (
+    MenuItem("Admin",
+             reverse('admin:index', kwargs={}),
+             weight=20,
+             icon="report",
+             separator=True),
+
+)
+
 # Define children for reports
 reportes_children = (
     MenuItem("Comisiones",
@@ -38,6 +48,7 @@ conciliaciones_children = (
 Menu.add_item("main", MenuItem("Inicio",
                                reverse('reportesVC:index'),
                                weight=10,
+                               children=inicio_children,
                                icon="tools",
                                separator=True))
 
