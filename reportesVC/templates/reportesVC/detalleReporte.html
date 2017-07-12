@@ -26,8 +26,24 @@
 		<li>Nombre Zip: {{ object.nombreZip}}</li>
 	</ul>
 
-	<form action="{{ request.build_absolute_uri }}descargarZip/" method="post" enctype="multipart/form-data">
-		{% csrf_token %}
-		<button class="submitForm" type="submit">{% bootstrap_icon "star" %}Descarga Archivo</button>
-	</form>
+ 	<div class="row">
+		<div class="col-sm-1 text-left">
+		</div>
+		<div class="col-sm-2 text-center">
+			<form action="{{ request.build_absolute_uri }}descargarZip/" method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				<button class="submitForm" type="submit">{% bootstrap_icon "star" %}Descarga Zip</button>
+			</form>
+		</div>
+		<div class="col-sm-3 text-center">
+			 {% if tipo_nombre == VentasPdf%}
+				<form action="{{ request.build_absolute_uri }}descargarRepCXC/" method="post" enctype="multipart/form-data">
+					{% csrf_token %}
+					<button class="submitForm" type="submit">{% bootstrap_icon "star" %}Descarga Reporte CXC</button>
+				</form>
+			{% endif %}
+		</div>
+		<div class="col-sm-6 text-left">
+		</div>
+	</div>
 {% endblock %}

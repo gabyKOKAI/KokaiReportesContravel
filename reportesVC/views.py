@@ -293,6 +293,16 @@ def descargarFile(request, tipoNombre, pk):
     return response
 
 @login_required
+def descargarRepCXC(request, tipoNombre, pk):
+    reporte = get_object_or_404(EjecucionReporte, pk=pk)
+    filePath = reporte.rutaArchivo + "ReporteCXC" + reporte.semana + ".csv"
+    fsock = open(filePath, "rb")
+    ## print("abrio1")
+    response = HttpResponse(fsock, content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=' + "ReporteCXC" + reporte.semana + ".csv"
+    return response
+
+@login_required
 def ejecutaComisiones(request, tipoNombre, status):
     variables = {}
 

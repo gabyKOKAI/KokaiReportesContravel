@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^rp(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/subirArchivo/$', views.subirArchivo, name='subirArchivo'),
     url(r'^rp(?P<tipoNombre>[\w]+)/(?P<pk>[0-9]+)/$', views.ReporteView.as_view(), name='reporte'),
     url(r'^rp(?P<tipoNombre>[\w]+)/(?P<pk>[0-9]+)/descargarZip/$', views.descargarZip, name='descargarZip'),
+    url(r'^rp(?P<tipoNombre>[\w]+)/(?P<pk>[0-9]+)/descargarRepCXC/$', views.descargarRepCXC, name='descargarRepCXC'),
 
     url(r'^cal(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/$', views.calculos, name='calculos'),
     url(r'^cal(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/new/$', views.ejecutaComisiones, name='ejecutaComisiones'),
