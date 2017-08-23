@@ -207,9 +207,11 @@ def subirArch(request, fileName, tipoNombre, subFolder):
         if (fileName == ""):
             fileName = str(request.FILES["myfile"])
         rutaArchivo = dirArchivos + tipoNombre + "/" + subFolder
+        print(rutaArchivo)
         handle_uploaded_file(request.FILES["myfile"], fileName, rutaArchivo)
         messages.success(request, "El archivo se subio con exito!!!")
     except Exception as err:
+        print(str(err))
         messages.error(request, "Favor de seleccionar un archivo para subir.")
         fileName = "error"
     return fileName
