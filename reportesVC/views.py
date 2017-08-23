@@ -456,7 +456,7 @@ def conciliaBancos(request, tipoNombre, status):
             ##messages.success(request, "La conciliación se ejecuto correctamente!")
             mf = ManageFiles.ManageFiles()
             filePath = dirConc + fecha[8:]
-            fileName = "Contravel" + fecha[:4] + fecha[5:7] + fecha[8:]
+            fileName = agencia + fecha[:4] + fecha[5:7] + fecha[8:]
             nombreZip = mf.createZip(filePath, fileName)
             fsock = open(nombreZip + ".zip", "rb")
             response = HttpResponse(fsock, content_type='application/zip')
