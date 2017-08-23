@@ -2,64 +2,81 @@
 {% load bootstrap3 %}
 
 {% block tituloPagina %}
-    Página de ejecucion de conciliacion de {{tipo_nombre}}
+    Página de ejecucion de conciliacion [{{tipo_nombre}}]
 {% endblock %}
 
 {% block HeaderPagina %}
-    Página de ejecucion de conciliacion de {{tipo_nombre}}
+    Página de ejecucion de conciliacion [{{tipo_nombre}}]
 {% endblock %}
 
 {% block content %}
-    <div class="row">
+     <div class="row">
         <div class="col-sm-1"></div>
         <div class="col-sm-11">
+               <br>
+                <form action="{% url 'reportesVC:conciliaBancos' tipoNombre=tipo_nombre status='ejecutando'%}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-6 text-right"></div>
+                        <div class="col-sm-6 text-left">
+                            <button class="submitForm" type="submit">{% bootstrap_icon "star" %} Conciliar</button>
+                        </div>
+                    </div>
+
+
                 <form action="{{ request.build_absolute_uri }}subirArchivo/" method="post" enctype="multipart/form-data" class="form">
                     {% csrf_token %}
+
+                     <div class="row">
+                        <div class="col-sm-3 text-left">
+                            <p>Selecciona Agencia:</p>
+                            <ul class="listaArchivos">
+                                <li><input type="radio" name="CBAgencia" value="Contravel" checked="checked" title="Text to show">Contravel
+                                </li>
+                                <li><input type="radio" name="CBAgencia" value="VK">Viajes Kokai
+                                </li>
+                                <li><input type="radio" name="CBAgencia" value="Otra">Otra
+                                </li>
+                            </ul>
+                        </div>
+                         <div class="col-sm-9 text-left">
+                             <p>Selecciona fecha:</p>
+                             <input id="currentDate" class="calendario" type="date" name="DATEreportes" />
+                        </div>
+                    </div>
+                    <p>Subir o sustituir los archivos de configuración:</p>
+                    <div class="row">
+                        <div class="col-sm-12 text-left">
+                        <ul class="listaArchivos">
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoSaldos" title="Text to show">Archivo Saldos.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesConfCliAL');">+/-</span>
+                                <div class="detalles" id="detallesConfCliAL">Las columnas deben llevar este orden: [CUENTA | SALDO ICAAV | SALDO BANCOS] en formato CSV sin comas y sin titulos.</div>
+                            </li>
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoBancos">Archivo Bancos.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesMex');">+/-</span>
+                                <div class="detalles" id="detallesMex">Las columnas deben llevar este orden: [FECHA | DESCRIPCION | CARGO | ABONO | CUENTA] en formato CSV sin comas y sin titulos.</div>
+                            </li>
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoAuxiliar" checked="checked">Archivo de ICAAV.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesArchivo');">+/-</span>
+                                <div class="detalles" id="detallesArchivo">Archivo auxiliar de ICAAV en formato CSV sin comas y sin titulos. (Agregar en este historicos)</div>
+                            </li>
+
+                        </ul>
+                         </div>
+                    </div>
                     <div class="row">
                         <div class="col-sm-6 text-right">
                             <input type="file" name="myfile">
                         </div>
                         <div class="col-sm-6 text-left">
-                            <button class="submitForm" type="submit">{% bootstrap_icon "star" %}Sube Archivo</button>
+                            <button class="submitForm" type="submit" name="subeArchivo">{% bootstrap_icon "star" %}Sube Archivo</button>
+                            <button class="submitForm" type="submit" name="bajaArchivo">{% bootstrap_icon "star" %}Baja Archivo</button>
                         </div>
                     </div>
                 </form>
+                </form>
 
-                {% if status != "Nuevo"%}
-                    <br>
-                    <form action="{% url 'reportesVC:creaReporte' tipoNombre=tipo_nombre status='ejecutando'%}" method="post">
-                        {% csrf_token %}
-                        {% for variable in variables_ultimo_reporte %}
-                            {% if variable.id != 3%}
-                                <div class="row">
-                                    <div class="col-sm-12 text-left">
-                                        <label class="labelForm" for="{{ variable.valor }}">{{ variable.nombre }}:</label>
-                                    <!--/div>
-                                    <div class="col-sm-9 text-left"-->
-                                        {% if variable.editable == 1%}
-                                            <input class="textForm" type="text" name="{{ variable.id }}_{{variable.nombre}}" id="{{ variable.id }}" value="{{ variable.valor }}" />
-                                        {% else %}
-                                            <label class="labelTextForm" name="{{ variable.id }}_{{variable.nombre}}" id="{{ variable.id }}">{{ variable.valor }}</label>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                    <!--input type="text" name="{{variable.nombre}}" id="variable{{ forloop.counter }}" value="{{ variable.id }}" /-->
-                            {% else %}
-                                <!--label for="{{ tipo_valor }}">{{ variable.nombre }}</label-->
-                                <input type="hidden" name="{{ variable.id }}_{{variable.nombre}}" id="{{ variable.id }}" value="{{ tipo_valor }}" />
-                                <!--input type="text" name="{{variable.nombre}}" id="variable{{ forloop.counter }}" value="{{ variable.id }}" /-->
-                                <!--br /-->
-                            {% endif %}
-                        {% endfor %}
 
-                        <div class="row">
-                            <div class="col-sm-6 text-right"></div>
-                            <div class="col-sm-6 text-left">
-                                <button class="submitForm" type="submit">{% bootstrap_icon "star" %} Ejecuta Reporte</button>
-                            </div>
-                        </div>
-                    </form>
-                {% endif %}
       </div>
     </div>
 {% endblock %}

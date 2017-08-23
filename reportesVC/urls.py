@@ -25,4 +25,6 @@ urlpatterns = [
     url(r'^cal(?P<tipoNombre>[\w]+)/(?P<pk>[0-9]+)/descargarFile/$', views.descargarFile, name='descargarFile'),
 
     url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/$', views.conciliaciones, name='conciliaciones'),
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliaBancos/$', views.conciliaBancos, name='conciliaBancos'),
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/subirArchivo/$', views.subirArchivoCon, name='subirArchivoCon'),
 ]
