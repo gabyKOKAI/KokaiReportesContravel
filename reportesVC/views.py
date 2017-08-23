@@ -405,61 +405,68 @@ def ejecutaComisiones(request, tipoNombre, status):
 @login_required
 @permission_required('reportesVC.can_run_Conciliacion')
 def conciliaBancos(request, tipoNombre, status):
-    variables = {}
-    ##print(str(request.POST.getlist('CBAgencia')))
-    agencia = str(request.POST.getlist('CBAgencia')[0])
-    newFileName = regresaFileNameConc(request, agencia)
-    fecha = str(request.POST.getlist('DATEreportes')[0])
-    if (fecha == ''):
-        fecha = datetime.datetime.today().strftime('%Y-%m-%d')
-        ##print("fecha" + fecha)
-    subFolder = fecha[2:4] + "-" + fecha[5:7] + "/"
+    if 'conciliar' in request.POST :
+        print("entre")
+        variables = {}
+        ##print(str(request.POST.getlist('CBAgencia')))
+        agencia = str(request.POST.getlist('CBAgencia')[0])
+        newFileName = regresaFileNameConc(request, agencia)
+        fecha = str(request.POST.getlist('DATEreportes')[0])
+        if (fecha == ''):
+            fecha = datetime.datetime.today().strftime('%Y-%m-%d')
+            ##print("fecha" + fecha)
+        subFolder = fecha[2:4] + "-" + fecha[5:7] + "/"
 
-    ###Primero guardo valores en la tabla de variables
-    ##variables = actualizaValores(request)
+        ###Primero guardo valores en la tabla de variables
+        ##variables = actualizaValores(request)
 
-    ###Despues guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
-    ##reporte = guardaHistorial(variables, tipoNombre)
+        ###Despues guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
+        ##reporte = guardaHistorial(variables, tipoNombre)
 
-    ###Por último, ejecuto reporte
-    ##agencia = "Contravel"
-    dirConc = dirArchivos + tipoNombre + "/" + subFolder
-    conci = Conciliador(agencia, fecha,dirConc)
+        ###Por último, ejecuto reporte
+        ##agencia = "Contravel"
+        dirConc = dirArchivos + tipoNombre + "/" + subFolder
+        conci = Conciliador(agencia, fecha,dirConc)
 
-    ### Conciliacion Bancos/ICAAV
-    conci.extractInfo()
-    if(len(conci.wriErr.mensajesErr) == 0):
-        conci.recorreBanco()
-        conci.recorreICAAV()
-        conci.recorreResCorto2()
+        ### Conciliacion Bancos/ICAAV
+        conci.extractInfo()
+        if(len(conci.wriErr.mensajesErr) == 0):
+            conci.recorreBanco()
+            conci.recorreICAAV()
+            conci.recorreResCorto2()
 
-    ###Actualizo status del historial de reportes
-    ##if nomArchivoNew != "":
-        ##reporte.estatus = "Calculado"
+        ###Actualizo status del historial de reportes
+        ##if nomArchivoNew != "":
+            ##reporte.estatus = "Calculado"
+            ##reporte.save()
+
+        ###Creo Zip y Actualizo linea a ejecucion reporte, con informacion del zip
+        ##reporte.nombreZip = conci.createZip()
         ##reporte.save()
 
-    ###Creo Zip y Actualizo linea a ejecucion reporte, con informacion del zip
-    ##reporte.nombreZip = conci.createZip()
-    ##reporte.save()
+        if len(conci.wriErr.mensajesErr) > 0:
+            getMessages(request, conci.wriErr.mensajesErr)
+            return HttpResponseRedirect(reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
 
-    if len(conci.wriErr.mensajesErr) > 0:
-        getMessages(request, conci.wriErr.mensajesErr)
-        return HttpResponseRedirect(reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
-
+        else:
+            ###Por último muestro resultado
+            ### con HttpResponseRedirect evito que se de doble click y se vuelva a ejecutar
+            ### con reverse recontruyo la URL
+            status="ok"
+            ##messages.success(request, "La conciliación se ejecuto correctamente!")
+            mf = ManageFiles.ManageFiles()
+            filePath = dirConc + fecha[8:]
+            fileName = "Contravel" + fecha[:4] + fecha[5:7] + fecha[8:]
+            nombreZip = mf.createZip(filePath, fileName)
+            fsock = open(nombreZip + ".zip", "rb")
+            response = HttpResponse(fsock, content_type='application/zip')
+            response[
+                'Content-Disposition'] = 'attachment; filename=' + fileName + '.zip'
+            return response
+            ##return HttpResponseRedirect(
+                ##reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+    elif('subeArchivo' or 'bajaArchivo') in request.POST :
+        return subirArchivoCon(request, tipoNombre, status)
     else:
-        ###Por último muestro resultado
-        ### con HttpResponseRedirect evito que se de doble click y se vuelva a ejecutar
-        ### con reverse recontruyo la URL
-        status="ok"
-        ##messages.success(request, "La conciliación se ejecuto correctamente!")
-        mf = ManageFiles.ManageFiles()
-        filePath = dirConc + fecha[8:]
-        fileName = "Contravel" + fecha[:4] + fecha[5:7] + fecha[8:]
-        nombreZip = mf.createZip(filePath, fileName)
-        fsock = open(nombreZip + ".zip", "rb")
-        response = HttpResponse(fsock, content_type='application/zip')
-        response[
-            'Content-Disposition'] = 'attachment; filename=' + fileName + '.zip'
-        return response
-        ##return HttpResponseRedirect(
-            ##reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+        return HttpResponseRedirect(
+            reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
