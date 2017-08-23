@@ -1,7 +1,9 @@
 from os import path, mkdir
 
+from ClasesGenericas import ManageFiles
 from ReportesPDFContravel import ReportesPDFContravel
 from ComisionesContravel import ComisionesContravel
+from Conciliador import Conciliador
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse  ## eventualmente lo podremos quitar
 from django.http import HttpResponseRedirect
@@ -10,6 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
 from django.contrib import messages
+import datetime
 
 from .models import TipoReporte, EjecucionReporte, VariablesUltimoReporte, MesReporte
 
@@ -176,12 +179,13 @@ def creaReporte(request, tipoNombre, status):
         reporte.save()
 
     ###Creo Zip y Actualizo linea a ejecucion reporte, con informacion del zip
-    reporte.nombreZip = rep.createZip()
+    mf = ManageFiles.ManageFiles()
+    reporte.nombreZip = mf.createZip(rep.directorio + "ReportesS" + rep.semana + rep.ano + "//", "ReportesS" + rep.semana + rep.ano)
     reporte.save()
 
     ##print(rep.mensajesErr)
-    if len(rep.mensajesErr) > 0:
-        getMessages(request, rep.mensajesErr)
+    if len(rep.wriErr.mensajesErr) > 0:
+        getMessages(request, rep.wriErr.mensajesErr)
         return HttpResponseRedirect(reverse('reportesVC:reportes', kwargs={'tipoNombre': tipoNombre, 'status': status}))
 
     else:
@@ -198,17 +202,32 @@ def handle_uploaded_file(file, filename, rutaArchivo):
         for chunk in file.chunks():
             destination.write(chunk)
 
-def subirArch(request, fileName, tipoNombre):
+def subirArch(request, fileName, tipoNombre, subFolder):
     try:
         if (fileName == ""):
             fileName = str(request.FILES["myfile"])
-        rutaArchivo = dirArchivos + tipoNombre + "/"
+        rutaArchivo = dirArchivos + tipoNombre + "/" + subFolder
         handle_uploaded_file(request.FILES["myfile"], fileName, rutaArchivo)
         messages.success(request, "El archivo se subio con exito!!!")
     except Exception as err:
         messages.error(request, "Favor de seleccionar un archivo para subir.")
         fileName = "error"
     return fileName
+
+def bajarArch(request,fileName,newFileName):
+    try:
+        if(path.isfile(fileName)):
+            fsock = open(fileName, "rb")
+            response = HttpResponse(fsock, content_type='application/force-download')
+            response['Content-Disposition'] = 'attachment; filename=' + newFileName
+            ##messages.success(request, "El archivo se descargo con exito!!!")
+        else:
+            messages.error(request, "No existe el archivo para descargar")
+            response = "error"
+    except Exception as err:
+        messages.error(request, "Error al descargar archivo")
+        response = "error"
+    return response
 
 def actualizaFileName(fileName):
     print(fileName)
@@ -221,7 +240,7 @@ def actualizaFileName(fileName):
 def subirArchivo(request, tipoNombre, status):
     status = "Error"
     if request.method == 'POST':
-        fileName = subirArch(request, "", tipoNombre)
+        fileName = subirArch(request, "", tipoNombre,"")
         if fileName != "error":
             status = "Subido"
         else:
@@ -244,7 +263,7 @@ def subirArchivoCal(request, tipoNombre, status):
         elif 'archivoCan' in mylist:
             newFileName = "CodIATACan.csv"
     if 'subeArchivo' in request.POST:
-        fileName = subirArch(request, newFileName, tipoNombre)
+        fileName = subirArch(request, newFileName, tipoNombre,"")
         if 'archivoCsv' in mylist:
             actualizaFileName(fileName)
             status = "Subido"
@@ -267,6 +286,50 @@ def subirArchivoCal(request, tipoNombre, status):
             messages.warning(request, "No es posible descargar este archivo, seleccione otra opción.")
             return HttpResponseRedirect(
                 reverse('reportesVC:calculos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+    else:
+        messages.warning(request, "No dio click en ninguna opción valida")
+        return HttpResponseRedirect(reverse('reportesVC:calculos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+
+def regresaFileNameConc(request, agencia):
+    status = "Error"
+    if request.method == 'POST':
+        mylist = request.POST.getlist('CBtipoArchivo')
+        newFileName = ""
+        if 'archivoSaldos' in mylist:
+            newFileName = "Saldos " + agencia + ".csv"
+        elif 'archivoBancos' in mylist:
+            newFileName = "Bancos " + agencia + ".csv"
+        elif 'archivoAuxiliar' in mylist:
+            newFileName = "ICAAV " + agencia + ".csv"
+    return newFileName
+
+@login_required
+def subirArchivoCon(request, tipoNombre, status):
+    status = "Error"
+    if request.method == 'POST':
+        agencia = str(request.POST.getlist('CBAgencia')[0])
+        newFileName = regresaFileNameConc(request, agencia)
+        fecha = str(request.POST.getlist('DATEreportes')[0])
+        if (fecha == ''):
+            fecha = datetime.datetime.today().strftime('%Y-%m-%d')
+            print("fecha" + fecha)
+        subFolder =  fecha[2:4] + "-" + fecha[5:7] + "/"
+
+    if 'subeArchivo' in request.POST:
+        fileName = subirArch(request, newFileName, tipoNombre, subFolder)
+        status = "Subido"
+        if fileName == "error":
+            status = "Error"
+        return HttpResponseRedirect(reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+    elif 'bajaArchivo' in request.POST:
+        fileName = dirArchivos + tipoNombre + "/" + subFolder + newFileName
+        response = bajarArch(request, fileName , newFileName)
+        status = "Bajado"
+        if(response == "error"):
+            status = "Error"
+            return HttpResponseRedirect(
+                reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+        return response
     else:
         messages.warning(request, "No dio click en ninguna opción valida")
         return HttpResponseRedirect(reverse('reportesVC:calculos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
@@ -328,8 +391,8 @@ def ejecutaComisiones(request, tipoNombre, status):
     reporte.nombreZip = nomArchivoNew
     reporte.save()
 
-    if len(calCom.mensajesErr) > 0:
-        getMessages(request, calCom.mensajesErr)
+    if len(calCom.wriErr.mensajesErr) > 0:
+        getMessages(request, calCom.wriErr.mensajesErr)
         return HttpResponseRedirect(reverse('reportesVC:calculos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
 
     else:
@@ -338,3 +401,65 @@ def ejecutaComisiones(request, tipoNombre, status):
         ### con reverse recontruyo la URL
         messages.success(request, "El calculo de comisiones se ejecuto correctamente!")
         return HttpResponseRedirect(reverse('reportesVC:calculo', kwargs={'tipoNombre': tipoNombre, 'pk': reporte.id}))
+
+@login_required
+@permission_required('reportesVC.can_run_Conciliacion')
+def conciliaBancos(request, tipoNombre, status):
+    variables = {}
+    ##print(str(request.POST.getlist('CBAgencia')))
+    agencia = str(request.POST.getlist('CBAgencia')[0])
+    newFileName = regresaFileNameConc(request, agencia)
+    fecha = str(request.POST.getlist('DATEreportes')[0])
+    if (fecha == ''):
+        fecha = datetime.datetime.today().strftime('%Y-%m-%d')
+        ##print("fecha" + fecha)
+    subFolder = fecha[2:4] + "-" + fecha[5:7] + "/"
+
+    ###Primero guardo valores en la tabla de variables
+    ##variables = actualizaValores(request)
+
+    ###Despues guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
+    ##reporte = guardaHistorial(variables, tipoNombre)
+
+    ###Por último, ejecuto reporte
+    ##agencia = "Contravel"
+    dirConc = dirArchivos + tipoNombre + "/" + subFolder
+    conci = Conciliador(agencia, fecha,dirConc)
+
+    ### Conciliacion Bancos/ICAAV
+    conci.extractInfo()
+    if(len(conci.wriErr.mensajesErr) == 0):
+        conci.recorreBanco()
+        conci.recorreICAAV()
+        conci.recorreResCorto2()
+
+    ###Actualizo status del historial de reportes
+    ##if nomArchivoNew != "":
+        ##reporte.estatus = "Calculado"
+        ##reporte.save()
+
+    ###Creo Zip y Actualizo linea a ejecucion reporte, con informacion del zip
+    ##reporte.nombreZip = conci.createZip()
+    ##reporte.save()
+
+    if len(conci.wriErr.mensajesErr) > 0:
+        getMessages(request, conci.wriErr.mensajesErr)
+        return HttpResponseRedirect(reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+
+    else:
+        ###Por último muestro resultado
+        ### con HttpResponseRedirect evito que se de doble click y se vuelva a ejecutar
+        ### con reverse recontruyo la URL
+        status="ok"
+        ##messages.success(request, "La conciliación se ejecuto correctamente!")
+        mf = ManageFiles.ManageFiles()
+        filePath = dirConc + fecha[8:]
+        fileName = "Contravel" + fecha[:4] + fecha[5:7] + fecha[8:]
+        nombreZip = mf.createZip(filePath, fileName)
+        fsock = open(nombreZip + ".zip", "rb")
+        response = HttpResponse(fsock, content_type='application/zip')
+        response[
+            'Content-Disposition'] = 'attachment; filename=' + fileName + '.zip'
+        return response
+        ##return HttpResponseRedirect(
+            ##reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
