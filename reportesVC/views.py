@@ -209,6 +209,7 @@ def subirArch(request, fileName, tipoNombre, subFolder):
         if (fileName == ""):
             fileName = str(request.FILES["myfile"])
         rutaArchivo = dirArchivos + tipoNombre + "/" + subFolder
+        ##print(rutaArchivo)
         handle_uploaded_file(request.FILES["myfile"], fileName, rutaArchivo)
         messages.success(request, "El archivo se subio con exito!!!")
     except Exception as err:
@@ -218,7 +219,9 @@ def subirArch(request, fileName, tipoNombre, subFolder):
 
 def bajarArch(request,fileName,newFileName):
     try:
+        ##print(fileName)
         if(path.isfile(fileName)):
+            ##print("bajando " + fileName)
             fsock = open(fileName, "rb")
             response = HttpResponse(fsock, content_type='application/force-download')
             response['Content-Disposition'] = 'attachment; filename=' + newFileName
@@ -232,7 +235,7 @@ def bajarArch(request,fileName,newFileName):
     return response
 
 def actualizaFileName(fileName):
-    print(fileName)
+    ##print(fileName)
     vURfileName = VariablesUltimoReporte.objects.get(pk=7)
     vURfileName.valor = fileName
     vURfileName.save()
@@ -314,20 +317,22 @@ def subirArchivoCon(request, tipoNombre, status):
         fecha = str(request.POST.getlist('DATEreportes')[0])
         if (fecha == ''):
             fecha = datetime.datetime.today().strftime('%Y-%m-%d')
-            print("fecha" + fecha)
+            ##print("fecha" + fecha)
         subFolder =  fecha[2:4] + "-" + fecha[5:7] + "/"
 
-    if 'subeArchivo' in request.POST:
+    if 'subeArchivo' == str(request.POST.getlist('boton')[0]):
         fileName = subirArch(request, newFileName, tipoNombre, subFolder)
         status = "Subido"
+        ##print(status + fileName)
         if fileName == "error":
             status = "Error"
         return HttpResponseRedirect(reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
-    elif 'bajaArchivo' in request.POST:
+    elif 'bajaArchivo' == str(request.POST.getlist('boton')[0]):
         fileName = dirArchivos + tipoNombre + "/" + subFolder + newFileName
         response = bajarArch(request, fileName , newFileName)
         status = "Bajado"
-        if(response == "error"):
+        ##print(status + str(response))
+        if(str(response) == "error"):
             status = "Error"
             return HttpResponseRedirect(
                 reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
@@ -407,7 +412,7 @@ def ejecutaComisiones(request, tipoNombre, status):
 @login_required
 @permission_required('reportesVC.can_run_Conciliacion')
 def conciliaBancos(request, tipoNombre, status):
-    if 'conciliar' in request.POST :
+    if 'conciliar' == str(request.POST.getlist('boton')[0]):
         ##print("entre")
         variables = {}
         ##print(str(request.POST.getlist('CBAgencia')))
@@ -467,7 +472,7 @@ def conciliaBancos(request, tipoNombre, status):
             return response
             ##return HttpResponseRedirect(
                 ##reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
-    elif('subeArchivo' or 'bajaArchivo') in request.POST :
+    elif('bajaArchivo' == str(request.POST.getlist('boton')[0]) or 'subeArchivo' == str(request.POST.getlist('boton')[0])):
         return subirArchivoCon(request, tipoNombre, status)
     else:
         return HttpResponseRedirect(
