@@ -180,7 +180,8 @@ def creaReporte(request, tipoNombre, status):
 
     ###Creo Zip y Actualizo linea a ejecucion reporte, con informacion del zip
     mf = ManageFiles.ManageFiles()
-    reporte.nombreZip = mf.createZip(rep.directorio + "ReportesS" + rep.semana + rep.ano + "//", "ReportesS" + rep.semana + rep.ano)
+    reporte.rutaArchivo = rep.directorio + "ReportesS" + rep.semana + rep.ano + "//"
+    reporte.nombreZip = mf.createZip(reporte.rutaArchivo, "ReportesS" + rep.semana + rep.ano)
     reporte.save()
 
     ##print(rep.mensajesErr)
