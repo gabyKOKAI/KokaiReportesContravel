@@ -349,7 +349,7 @@ def descargarZip(request, tipoNombre, pk):
     ##print("abrio")
     response = HttpResponse(fsock, content_type='application/zip')
     response[
-        'Content-Disposition'] = 'attachment; filename=' + reporte.tipoReporte.nombreLargo + 'ReportesS' + reporte.semana + reporte.anoPeriodo + '.zip'
+        'Content-Disposition'] = 'attachment; filename=' + reporte.tipoReporte.nombreLargo + 'ReportesS' + reporte.semana + reporte.anoPeriodo ##+ '.zip'
     return response
 
 @login_required
