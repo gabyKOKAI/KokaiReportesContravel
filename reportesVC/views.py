@@ -181,7 +181,7 @@ def creaReporte(request, tipoNombre, status):
     ###Creo Zip y Actualizo linea a ejecucion reporte, con informacion del zip
     mf = ManageFiles.ManageFiles()
     reporte.rutaArchivo = rep.directorio + "ReportesS" + rep.semana + rep.ano + "//"
-    reporte.nombreZip = mf.createZip(reporte.rutaArchivo, "ReportesS" + rep.semana + rep.ano)
+    reporte.nombreZip = mf.createZip(reporte.rutaArchivo, rep.directorio, "ReportesS" + rep.semana + rep.ano)
     reporte.save()
 
     ##print(rep.mensajesErr)
@@ -458,7 +458,7 @@ def conciliaBancos(request, tipoNombre, status):
             mf = ManageFiles.ManageFiles()
             filePath = dirConc + fecha[8:]
             fileName = agencia + fecha[:4] + fecha[5:7] + fecha[8:]
-            nombreZip = mf.createZip(filePath, fileName)
+            nombreZip = mf.createZip(filePath, filePath, fileName)
             fsock = open(nombreZip + ".zip", "rb")
             response = HttpResponse(fsock, content_type='application/zip')
             response[
