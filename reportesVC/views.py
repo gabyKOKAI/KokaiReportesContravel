@@ -133,6 +133,7 @@ def guardaHistorial(variables, tipoNombre):
     reporte.estatus = "Iniciandos"
     reporte.nombreArchivo = variables['NOMBRE ARCHIVO']
     reporte.rutaArchivo = dirArchivos + tipoNombre + "/"
+    
     reporte.save()
     return reporte
 
