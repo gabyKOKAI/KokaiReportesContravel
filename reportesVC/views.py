@@ -465,7 +465,7 @@ def conciliaBancos(request, tipoNombre, status):
             filePath = dirConc + fecha[8:] + "/"
             fileName = agencia + fecha[:4] + fecha[5:7] + fecha[8:]
             nombreZip = mf.createZip(filePath, filePath, fileName)
-            fsock = open(nombreZip, "rb")
+            fsock = open(filePath + nombreZip, "rb")
             response = HttpResponse(fsock, content_type='application/zip')
             response[
                 'Content-Disposition'] = 'attachment; filename=' + fileName + '.zip'
