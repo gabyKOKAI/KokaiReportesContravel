@@ -213,7 +213,7 @@ def subirArch(request, fileName, tipoNombre, subFolder):
         handle_uploaded_file(request.FILES["myfile"], fileName, rutaArchivo)
         messages.success(request, "El archivo se subio con exito!!!")
     except Exception as err:
-        messages.error(request, "Favor de seleccionar un archivo para subir.")
+        messages.error(request, "Favor de seleccionar un archivo para subir." + str(err))
         fileName = "error"
     return fileName
 
@@ -318,10 +318,10 @@ def subirArchivoCon(request, tipoNombre, status):
         if (fecha == ''):
             fecha = datetime.datetime.today().strftime('%Y-%m-%d')
             ##print("fecha" + fecha)
-        subFolder =  fecha[2:4] + "-" + fecha[5:7] + "/"
+        subFolder =  fecha[2:4] + "-" + fecha[5:7] + "/" + agencia + "/"
 
     if 'subeArchivo' == str(request.POST.getlist('boton')[0]):
-        fileName = subirArch(request, newFileName, tipoNombre, subFolder)
+        fileName = subirArch(request, newFileName, tipoNombre, "")
         status = "Subido"
         ##print(status + fileName)
         if fileName == "error":
@@ -432,8 +432,8 @@ def conciliaBancos(request, tipoNombre, status):
 
         ###Por último, ejecuto reporte
         ##agencia = "Contravel"
-        dirConc = dirArchivos + tipoNombre + "/" + subFolder
-        conci = Conciliador(agencia, fecha,dirConc)
+        dirConc = dirArchivos + tipoNombre + "/"
+        conci = Conciliador(agencia, fecha,dirConc, subFolder)
 
         ### Conciliacion Bancos/ICAAV
         conci.extractInfo()
@@ -462,7 +462,7 @@ def conciliaBancos(request, tipoNombre, status):
             status="ok"
             ##messages.success(request, "La conciliación se ejecuto correctamente!")
             mf = ManageFiles.ManageFiles()
-            filePath = dirConc + fecha[8:] + "/"
+            filePath = dirConc + subFolder + fecha[8:] + "/" + agencia + "/"
             fileName = agencia + fecha[:4] + fecha[5:7] + fecha[8:]
             nombreZip = mf.createZip(filePath, dirConc, fileName)
             fsock = open(dirConc + nombreZip, "rb")
