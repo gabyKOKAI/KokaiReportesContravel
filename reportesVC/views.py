@@ -204,11 +204,11 @@ def handle_uploaded_file(file, filename, rutaArchivo):
         for chunk in file.chunks():
             destination.write(chunk)
 
-def subirArch(request, fileName, tipoNombre, subFolder):
+def subirArch(request, fileName, tipoNombre, subFoldr):
     try:
         if (fileName == ""):
             fileName = str(request.FILES["myfile"])
-        rutaArchivo = dirArchivos + tipoNombre + "/" + subFolder
+        rutaArchivo = dirArchivos + tipoNombre + "/" + subFoldr
         ##print(rutaArchivo)
         handle_uploaded_file(request.FILES["myfile"], fileName, rutaArchivo)
         messages.success(request, "El archivo se subio con exito!!!")
@@ -318,10 +318,10 @@ def subirArchivoCon(request, tipoNombre, status):
         if (fecha == ''):
             fecha = datetime.datetime.today().strftime('%Y-%m-%d')
             ##print("fecha" + fecha)
-        subFolder =  fecha[2:4] + "-" + fecha[5:7] + "/" + agencia + "/"
+        subFolder =  fecha[2:4] + "-" + fecha[5:7] + "/"
 
     if 'subeArchivo' == str(request.POST.getlist('boton')[0]):
-        fileName = subirArch(request, newFileName, tipoNombre, "")
+        fileName = subirArch(request, newFileName, tipoNombre, subFolder)
         status = "Subido"
         ##print(status + fileName)
         if fileName == "error":
