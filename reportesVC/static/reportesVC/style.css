@@ -5,7 +5,10 @@ body {
     background-image: url("abstractBlueBackgrounds.jpg");
     background-size: cover;
     /*border: 1px solid red;*/
-    color: white;
+ }
+
+ .textoBlanco{
+ color: white;
  }
 
 .tituloPaginas{
@@ -17,6 +20,16 @@ body {
     width:100%;
     align: center;
     text-align: center;
+}
+
+.centerText{
+    align: center;
+    text-align: center;
+}
+.tablaActu
+{
+    color: darkblue;
+    background: darkgray;
 }
 
 /*.menu{
@@ -59,6 +72,11 @@ body {
     color:black;
 }
 
+.textFormSmall {
+    color:black;
+    width:25px;
+}
+
 .labelForm{
     width:2l vien00px;
     align:right;
@@ -95,6 +113,12 @@ body {
 
 .listaArchivos{
     list-style-type: none;
+    /*border: 1px solid red;*/
+}
+
+.listaMeses{
+    list-style-type: none;
+    columns: 4;
     /*border: 1px solid red;*/
 }
 

@@ -8,6 +8,11 @@ inicio_children = (
              weight=20,
              icon="report",
              separator=True),
+    MenuItem("AdminConta",
+             reverse('reportesVC:adminConta', kwargs={}),
+             weight=20,
+             icon="report",
+             separator=True),
 
 )
 
@@ -37,12 +42,18 @@ calculos_children = (
 # Define children for conciliaciones
 conciliaciones_children = (
     MenuItem("Bancos",
-             reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': 'concBancos', 'status': 'Nuevo'}),
+             reverse('reportesVC:conciliacionBancos', kwargs={'tipoNombre': 'concBancos', 'status': 'Nuevo'}),
+             weight=20,
+             icon="report",
+             separator=True),
+    MenuItem("SAT",
+             reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': 'concSAT', 'status': 'Nuevo'}),
              weight=20,
              icon="report",
              separator=True),
 
 )
+
 
 # Add two items to our main menu
 Menu.add_item("main", MenuItem("Inicio",

@@ -1,0 +1,56 @@
+/*div.dataTables_length label {
+ width: 460px;
+ float: left;
+ text-align: left;
+ color: white;
+}
+
+
+div.dataTables_info {
+ padding-top: 8px;
+ color: white;
+}
+
+div.dataTables_paginate {
+ float: right;
+ margin: 0;
+ color: white;
+}
+
+table {
+ margin: 1em 0;
+ clear: both;
+ color: white;
+}
+
+table.dataTable th:active {
+ outline: none;
+ color: white;
+}
+*/
+
+.dataTables_length label {
+ color: white;
+}
+.dataTables_length select {
+ color: darkblue;
+}
+
+.dataTables_filter label {
+ //float: right;
+ //width: 460px;
+ color: white;
+}
+
+.dataTables_filter label input{
+ color: red;
+ color: darkblue;
+}
+
+.dataTables_info {
+ color: white !important;
+}
+
+.dataTables_paginate .paginate_button{
+ color: white !important;
+}

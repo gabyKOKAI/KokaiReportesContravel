@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 # Create your models here.
 
@@ -35,7 +36,7 @@ class VariablesUltimoReporte(models.Model):
 
 class EjecucionReporte(models.Model):
     class Meta:
-        permissions = (("can_run_Report", "Ejecuta Reporte"),("can_run_Calculos", "Ejecuta Calculos"),("can_run_Conciliacion", "Ejecuta Conciliacion"),)
+        permissions = (("can_run_Report", "Ejecuta Reporte"),("can_run_Calculos", "Ejecuta Calculos"),("can_run_Conciliacion", "Ejecuta Conciliacion"),("can_run_AdminConta", "Administracion Conta"))
     def __str__(self):
         return str(self.id) + ": "  + str(self.fechaEjecucion)
     tipoReporte = models.ForeignKey(TipoReporte, on_delete=models.CASCADE)
@@ -49,8 +50,18 @@ class EjecucionReporte(models.Model):
     nombreArchivo = models.CharField(max_length=50,default='')
     rutaArchivo = models.CharField(max_length=100,default='')
     nombreZip = models.CharField(max_length=50,default='')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1, on_delete=models.CASCADE)
 
 class Document(models.Model):
     description = models.CharField(max_length=255, blank=True)
     document = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+class ActualizacionesArchivos(models.Model):
+    def __str__(self):
+        return str(self.id) + ": "  + str(self.fechaEjecucion) + "-" + str(self.user) + "-" + self.tipoReporte.nombre + "-" + self.nombreArchivo
+    tipoReporte = models.ForeignKey(TipoReporte, on_delete=models.CASCADE)
+    nombreArchivo = models.CharField(max_length=50, default='')
+    estatus=  models.CharField(max_length=10, default='')
+    fechaEjecucion = models.DateTimeField('Fecha de ejecucion',auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1,on_delete=models.CASCADE)

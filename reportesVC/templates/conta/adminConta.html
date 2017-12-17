@@ -1,0 +1,75 @@
+{% extends '../base.html' %}
+{% block tituloPagina %}
+    Página admin de conta
+{% endblock %}
+
+{% block HeaderPagina %}
+    Página admin de conta
+{% endblock %}
+
+{% block content %}
+
+
+	<script type="text/javascript" src="//code.jquery.com/jquery-1.12.4.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"/>
+
+
+
+    <script type="text/javascript">
+    <!--http://legacy.datatables.net/usage/i18n-->
+    $(document).ready(function(){
+        $('#myTable').dataTable(
+        {
+            "order": [[ 3, "desc" ]],
+            "bFilter": true,
+            "oLanguage": {
+            "sInfo": "Registros totales: _TOTAL_ / Mostrados del _START_ al _END_",
+            "sZeroRecords": "No se encontr&oacute; el registro",
+            "sLengthMenu": "_MENU_ Registros por pagina",
+            "sInfoFiltered": "( Filtrado de _MAX_ registros )",
+            "sSearch":"Buscar",
+            "oPaginate": {
+                "sPrevious": "<",
+                "sNext": ">",
+                "sFirst": "Primera",
+                "sLast": "Ultima",
+            }
+        }
+        }
+        );
+    });
+    </script>
+
+    <div class="center">
+        {% csrf_token %}
+
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+        <table id="myTable" class="tablaActu table table-condensed table-responsive table-striped pagination">
+            <thead>
+                <tr>
+                    <th class="col-sm-2 centerText">TipoReporte</th>
+                    <th class="col-sm-4 centerText">NombreArchivo</th>
+                    <th class="col-sm-1 centerText">Estatus</th>
+                    <th class="col-sm-3 centerText">Fecha Ejecucion</th>
+                    <th class="col-sm-2 centerText">Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for log in lista_log_conta %}
+                    <tr>
+                        <td>{{ log.tipoReporte.nombreLargo }}</td>
+                        <td>{{ log.nombreArchivo }}</td>
+                        <td>{{ log.estatus }}</td>
+                        <td>{{ log.fechaEjecucion }}</td>
+                        <td>{{ log.user.username }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <div class="col-sm-1"></div>
+    </div>
+
+{% endblock %}
