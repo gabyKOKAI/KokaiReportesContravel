@@ -24,7 +24,11 @@ urlpatterns = [
     url(r'^cal(?P<tipoNombre>[\w]+)/(?P<pk>[0-9]+)/$', views.CalculoView.as_view(), name='calculo'),
     url(r'^cal(?P<tipoNombre>[\w]+)/(?P<pk>[0-9]+)/descargarFile/$', views.descargarFile, name='descargarFile'),
 
-    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/$', views.conciliaciones, name='conciliaciones'),
+    url(r'^admin/Conta/$', views.adminConta, name='adminConta'),
+
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliacionBancos$', views.conciliacionBancos, name='conciliacionBancos'),
     url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliaBancos/$', views.conciliaBancos, name='conciliaBancos'),
-    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/subirArchivo/$', views.subirArchivoCon, name='subirArchivoCon'),
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/subirArchivoCon/$', views.subirArchivoCon, name='subirArchivoCon'),
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliacionSAT$', views.conciliacionSAT, name='conciliacionSAT'),
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliaSAT/$', views.conciliaSAT, name='conciliaSAT'),
 ]

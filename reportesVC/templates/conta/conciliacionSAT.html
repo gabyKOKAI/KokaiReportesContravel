@@ -1,0 +1,120 @@
+{% extends '../base.html' %}
+{% load bootstrap3 %}
+
+{% block tituloPagina %}
+    Página de ejecucion de conciliacion [{{tipo_nombre_largo}}]
+{% endblock %}
+
+{% block HeaderPagina %}
+    Página de ejecucion de conciliacion [{{tipo_nombre_largo}}]
+{% endblock %}
+
+{% block content %}
+     <div class="row textoBlanco">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-11">
+               <br>
+                <form action="{% url 'reportesVC:conciliaSAT' tipoNombre=tipo_nombre status='ejecutando'%}" method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-sm-6 text-left">
+                            <p>Selecciona Meses:</p>
+                            <ul class="listaMeses">
+                                <li><input type="checkbox" name="CBMes" value="01">Enero
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="02">Febrero
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="03">Marzo
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="04">Abril
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="05">Mayo
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="06">Junio
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="07">Julio
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="08">Agosto
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="09">Septiembre
+                                </li>
+                                 <li><input type="checkbox" name="CBMes" value="10">Octubre
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="11">Noviembre
+                                </li>
+                                <li><input type="checkbox" name="CBMes" value="12">Diciembre
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="row">
+                        <div class="col-sm-6 text-left">
+                            Año 2 digitos: <input class="textFormSmall" type="text" name="InpAno"  maxlength="2"/>
+                        </div>
+                     </div>
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-sm-6 text-right"></div>
+                        <div class="col-sm-6 text-left">
+                            <button class="submitForm" type="submit" name="boton" value="conciliar">{% bootstrap_icon "star" %} Conciliar</button>
+                        </div>
+                    </div>
+
+                <hr>
+                <form action="{{ request.build_absolute_uri }}subirArchivoCon/" method="post" enctype="multipart/form-data" class="form">
+                    {% csrf_token %}
+
+                     <div class="row">
+                        <div class="col-sm-3 text-left">
+                            <p>Selecciona Agencia:</p>
+                            <ul class="listaArchivos">
+                                <li><input type="radio" name="CBAgencia" value="Contravel" checked="checked" title="Text to show">Contravel
+                                </li>
+                                <li><input type="radio" name="CBAgencia" value="VK">Viajes Kokai
+                                </li>
+                                <li><input type="radio" name="CBAgencia" value="Otra">Otra
+                                </li>
+                            </ul>
+                        </div>
+                         <div class="col-sm-9 text-left">
+                             <p>Selecciona fecha:</p>
+                             <input id="currentDate" class="calendario" type="date" name="DATEreportes" />
+                        </div>
+                    </div>
+                    <p>Subir o sustituir los archivos de configuración:</p>
+                    <div class="row">
+                        <div class="col-sm-12 text-left">
+                        <ul class="listaArchivos">
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoSAT" title="Text to show">Archivo SAT (Recibidas y Emitidas).
+                                <span class="masDetalle" onclick="toggle_visibility('detallesConfCliAL');">+/-</span>
+                                <div class="detalles" id="detallesConfCliAL">Las columnas deben llevar este orden: [Verificado ó Asoc.|Estado SAT|Version|Tipo|Fecha Emision|Fecha Timbrado|EstadoPago|FechaPago|Serie|Folio|UUID|UUID Relacion|RFC Emisor|Nombre Emisor|LugarDeExpedicion|RFC Receptor|Nombre Receptor|ResidenciaFiscal|NumRegIdTrib|UsoCFDI|SubTotal|Descuento|Total IEPS|IVA 16%|Retenido IVA|Retenido ISR|ISH|Total|TotalOriginal|Total Trasladados|Total Retenidos|Total LocalTrasladado|Total LocalRetenido|Complemento|Moneda|Tipo De Cambio|FormaDePago|Metodo de Pago|NumCtaPago|Condicion de Pago|Conceptos|Combustible|IEPS 3%|IEPS 6%|IEPS 7%|IEPS 8%|IEPS 9%|IEPS 26.5%|IEPS 30%|IEPS 53%|IEPS 160%|Archivo XML|Direccion Emisor|Localidad Emisor] en formato CSV sin comas y sin titulos.</div>
+                            </li>
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoNomina">Archivo Nomina.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesMex');">+/-</span>
+                                <div class="detalles" id="detallesMex">Las columnas deben llevar este orden: [Verificado ó Asoc.|EstadoSAT|FechaEmision|Serie|Folio|UUID|RFC Receptor|NombreReceptor|RegistroPatronal |TipoNomina |FechaPago |FechaInicialPago |FechaFinalPago |NumDiasPagados |TotalPercepciones |TotalDeducciones |TotalOtrosPagos |SubTotal|Descuento|ISR XML|Total|MetodoPago|Regimen|ArchivoXML|Conceptos|Version |Moneda|TipoCambio|ReceptorCurp |NumSeguridadSocial |FechaInicioRelLaboral |Antigüedad |TipoContratoTipoContrato|Sindicalizado |TipoJornada |TipoRegimen |NumEmpleado |Departamento |Pueston |RiesgoPuesto |PeriodicidadPago |Banco |CuentaBancaria |SalarioBaseCotApor |SalarioDiarioIntegrado |ClaveEntFed |TotalSueldosPer|TotalSeparacionIndemnizacionPer|TotalJubilacionPensionRetiroPer|TotalGravadoPersepcion |TotalExentoPersepcion|TotalOtrasDeducciones |TotalImpuestosRetenidosDed] en formato CSV sin comas y sin titulos.</div>
+                            </li>
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoDiarios" checked="checked">Diario de ICAAV.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesArchivo');">+/-</span>
+                                <div class="detalles" id="detallesArchivo">Archivo diario de ICAAV en formato CSV sin comas y sin titulos.
+                                Las columnas deben llevar este orden: [datos_poliza_id_sucursal|datos_poliza_anio|datos_poliza_mes|datos_poliza_tipo|datos_poliza_num_poliza|datos_poliza_fecha|datos_poliza_concepto|datos_poliza_estatus|datos_poliza_id_stat|datos_poliza_fecha_mod|detalle_poliza_id_sucursal|detalle_poliza_anio|detalle_poliza_mes|detalle_poliza_tipo|detalle_poliza_num_poliza|detalle_poliza_movimiento|detalle_poliza_cuen_num_cuenta|detalle_poliza_referencia|detalle_poliza_concepto_mov|detalle_poliza_tipo_cambio|detalle_poliza_cargo|detalle_poliza_abono|detalle_poliza_documento|detalle_poliza_id_serie|detalle_poliza_fac_numero|detalle_poliza_id_proveedor|detalle_poliza_numero_bol|detalle_poliza_origen|detalle_poliza_id_stat|detalle_poliza_fecha_mod|cuentas_contab_nombre_cta|sucursales_cve|detalle_poliza_uuid|folio_cheque] en formato CSV sin comas y sin titulos.</div>
+                            </li>
+
+                        </ul>
+                         </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6 text-right">
+                            <input type="file" name="myfile">
+                        </div>
+                        <div class="col-sm-6 text-left">
+                            <button class="submitForm" type="submit" name="boton" value="subeArchivo">{% bootstrap_icon "star" %}Sube Archivo</button>
+                        </div>
+                    </div>
+                </form>
+                </form>
+
+
+      </div>
+    </div>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'reportesVC/base.html' %}
+{% extends '../base.html' %}
 {% load bootstrap3 %}
 
 {% block tituloPagina %}
@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="textoBlanco">
 	<p>Se ejecuto el reporte con la siguiente informacion:</p>
 	<ul>
 		<li>ID: {{ object.id }}</li>
@@ -46,4 +47,5 @@
 		<div class="col-sm-6 text-left">
 		</div>
 	</div>
+</div>
 {% endblock %}

@@ -4,6 +4,7 @@ from ClasesGenericas import ManageFiles
 from ReportesPDFContravel import ReportesPDFContravel
 from ComisionesContravel import ComisionesContravel
 from Conciliador import Conciliador
+from ConciliadorSAT import ConciliadorSAT
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse  ## eventualmente lo podremos quitar
 from django.http import HttpResponseRedirect
@@ -12,9 +13,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
 from django.contrib import messages
+from django.contrib import auth
 import datetime
 
-from .models import TipoReporte, EjecucionReporte, VariablesUltimoReporte, MesReporte
+from .models import TipoReporte, EjecucionReporte, VariablesUltimoReporte, MesReporte, ActualizacionesArchivos
 
 ##from django.http import Http404
 ##from django.template import loader
@@ -68,6 +70,11 @@ def reportes(request, tipoNombre, status):
                   {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
                    'variables_ultimo_reporte': variablesUltimoReporte, 'status': status})
 
+@permission_required('reportesVC.can_run_AdminConta')
+def adminConta(request):
+    listaLogConta = ActualizacionesArchivos.objects.all()
+    return render(request, 'conta/adminConta.html',{'lista_log_conta':listaLogConta})
+
 @login_required
 @permission_required('reportesVC.can_run_Calculos')
 def calculos(request, tipoNombre, status):
@@ -79,13 +86,19 @@ def calculos(request, tipoNombre, status):
 
 @login_required
 @permission_required('reportesVC.can_run_Conciliacion')
-def conciliaciones(request, tipoNombre, status):
+def conciliacionBancos(request, tipoNombre, status):
     tipo = TipoReporte.objects.get(nombre=tipoNombre)
-    variablesUltimoReporte = VariablesUltimoReporte.objects.all()
-    return render(request, 'reportesVC/conciliaciones.html',
+    return render(request, 'conta/conciliacionBancos.html',
                   {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
-                   'variables_ultimo_reporte': variablesUltimoReporte, 'status': status})
+                   'status': status})
 
+@login_required
+@permission_required('reportesVC.can_run_Conciliacion')
+def conciliacionSAT(request, tipoNombre, status):
+    tipo = TipoReporte.objects.get(nombre=tipoNombre)
+    return render(request, 'conta/conciliacionSAT.html',
+                  {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
+                    'status': status})
 
 '''
 ### Used before
@@ -121,7 +134,7 @@ def actualizaValores(request):
 
 
 ### Guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
-def guardaHistorial(variables, tipoNombre):
+def guardaHistorial(variables, tipoNombre, request):
     reporte = EjecucionReporte()
     reporte.tipoReporte = TipoReporte.objects.get(pk=variables["TIPO REPORTE"])
     reporte.mesPeriodo = MesReporte.objects.get(pk=variables["MES"])
@@ -133,9 +146,21 @@ def guardaHistorial(variables, tipoNombre):
     reporte.estatus = "Iniciandos"
     reporte.nombreArchivo = variables['NOMBRE ARCHIVO']
     reporte.rutaArchivo = dirArchivos + tipoNombre + "/"
+    reporte.user = request.user
     
     reporte.save()
     return reporte
+
+
+### Guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
+def guardaActuArch(tipoNombre, nombreArchivo, status, request):
+    actArch = ActualizacionesArchivos()
+    actArch.tipoReporte = TipoReporte.objects.get(nombre=tipoNombre)
+    actArch.estatus = status
+    actArch.nombreArchivo = nombreArchivo[-50:]
+    actArch.user = request.user
+    actArch.save()
+    return actArch
 
 
 ### Get Error and Success messages
@@ -154,6 +179,7 @@ def getMessages(request, mensajes):
 
 
 @login_required
+@permission_required('reportesVC.can_run_Report')
 def creaReporte(request, tipoNombre, status):
     variables = {}
 
@@ -161,7 +187,7 @@ def creaReporte(request, tipoNombre, status):
     variables = actualizaValores(request)
 
     ###Despues guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
-    reporte = guardaHistorial(variables, tipoNombre)
+    reporte = guardaHistorial(variables, tipoNombre, request)
 
     ###Por último, ejecuto reporte
     rep = ReportesPDFContravel(reporte.semana, reporte.anoPeriodo, reporte.mesPeriodo.nombre, reporte.diaIniciaPeriodo,
@@ -254,6 +280,7 @@ def subirArchivo(request, tipoNombre, status):
     return HttpResponseRedirect(reverse('reportesVC:reportes', kwargs={'tipoNombre': tipoNombre, 'status': status}))
 
 @login_required
+@permission_required('reportesVC.can_run_Calculos')
 def subirArchivoCal(request, tipoNombre, status):
     status = "Error"
     if request.method == 'POST':
@@ -306,9 +333,16 @@ def regresaFileNameConc(request, agencia):
             newFileName = "Bancos " + agencia + ".csv"
         elif 'archivoAuxiliar' in mylist:
             newFileName = "ICAAV " + agencia + ".csv"
+        elif 'archivoDiarios' in mylist:
+            newFileName = "Diarios" + agencia + ".csv"
+        elif 'archivoSAT' in mylist:
+            newFileName = "SAT " + agencia + ".csv"
+        elif 'archivoNomina' in mylist:
+            newFileName = "Nomina " + agencia + ".csv"
     return newFileName
 
 @login_required
+@permission_required('reportesVC.can_run_Conciliacion')
 def subirArchivoCon(request, tipoNombre, status):
     status = "Error"
     if request.method == 'POST':
@@ -322,20 +356,28 @@ def subirArchivoCon(request, tipoNombre, status):
 
     if 'subeArchivo' == str(request.POST.getlist('boton')[0]):
         fileName = subirArch(request, newFileName, tipoNombre, subFolder)
+        guardaActuArch(tipoNombre, fileName, "subioArch", request)
         status = "Subido"
-        ##print(status + fileName)
         if fileName == "error":
             status = "Error"
-        return HttpResponseRedirect(reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+        if "SAT" in tipoNombre:
+            return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+        elif "Bancos" in tipoNombre:
+            return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionBancos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
     elif 'bajaArchivo' == str(request.POST.getlist('boton')[0]):
         fileName = dirArchivos + tipoNombre + "/" + subFolder + newFileName
         response = bajarArch(request, fileName , newFileName)
+        guardaActuArch(tipoNombre, fileName, "bajoArch", request)
         status = "Bajado"
-        ##print(status + str(response))
         if(str(response) == "error"):
             status = "Error"
-            return HttpResponseRedirect(
-                reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+            if "SAT" in tipoNombre:
+                return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+            elif "Bancos" in tipoNombre:
+                return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionBancos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
         return response
     else:
         messages.warning(request, "No dio click en ninguna opción valida")
@@ -373,6 +415,7 @@ def descargarRepCXC(request, tipoNombre, pk):
     return response
 
 @login_required
+@permission_required('reportesVC.can_run_Conciliacion')
 def ejecutaComisiones(request, tipoNombre, status):
     variables = {}
 
@@ -380,7 +423,7 @@ def ejecutaComisiones(request, tipoNombre, status):
     variables = actualizaValores(request)
 
     ###Despues guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
-    reporte = guardaHistorial(variables, tipoNombre)
+    reporte = guardaHistorial(variables, tipoNombre, request)
 
     ###Por último, ejecuto reporte
     calCom = ComisionesContravel(reporte.semana, reporte.anoPeriodo, reporte.mesPeriodo.nombre, reporte.nombreArchivo,
@@ -428,7 +471,7 @@ def conciliaBancos(request, tipoNombre, status):
         ##variables = actualizaValores(request)
 
         ###Despues guardo con status iniciando ejecución en ejecucionreporte con nombre y ruta del archivo
-        ##reporte = guardaHistorial(variables, tipoNombre)
+        ##reporte = guardaHistorial(variables, tipoNombre, request)
 
         ###Por último, ejecuto reporte
         ##agencia = "Contravel"
@@ -453,12 +496,13 @@ def conciliaBancos(request, tipoNombre, status):
 
         if len(conci.wriErr.mensajesErr) > 0:
             getMessages(request, conci.wriErr.mensajesErr)
-            return HttpResponseRedirect(reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+            return HttpResponseRedirect(reverse('reportesVC:conciliacionBancos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
 
         else:
             ###Por último muestro resultado
             ### con HttpResponseRedirect evito que se de doble click y se vuelva a ejecutar
             ### con reverse recontruyo la URL
+            guardaActuArch(tipoNombre, agencia + "-" + fecha, "concilio", request)
             status="ok"
             ##messages.success(request, "La conciliación se ejecuto correctamente!")
             mf = ManageFiles.ManageFiles()
@@ -476,4 +520,62 @@ def conciliaBancos(request, tipoNombre, status):
         return subirArchivoCon(request, tipoNombre, status)
     else:
         return HttpResponseRedirect(
-            reverse('reportesVC:conciliaciones', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+            reverse('reportesVC:conciliacionBancos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+
+
+@login_required
+@permission_required('reportesVC.can_run_Conciliacion')
+def conciliaSAT(request, tipoNombre, status):
+        if 'conciliar' == str(request.POST.getlist('boton')[0]):
+            ##print("entre")
+            variables = {}
+            ##print(str(request.POST.getlist('CBAgencia')))
+            agencia = str(request.POST.getlist('CBAgencia')[0])
+            newFileName = regresaFileNameConc(request, agencia)
+            ano = str(request.POST.getlist('InpAno')[0])
+            if (ano == ''):
+                ano = datetime.datetime.today().strftime('%y')
+                ##print("ano" + ano)
+            mesesAux = request.POST.getlist('CBMes')
+            meses = []
+            for mesStr in mesesAux:
+                meses.append(int(mesStr))
+            ##print(meses)
+            if(meses == []):
+                meses.append(int(datetime.datetime.today().strftime('%m')))
+            ###Ejecuto reporte
+            dirConc = dirArchivos + tipoNombre + "/"
+            conciSAT = ConciliadorSAT(agencia, dirConc, meses,ano)
+
+            ### Conciliacion SAT/ICAAV
+            conciSAT.extractInfoDiarios()
+            conciSAT.extractInfoSAT()
+            conciSAT.extractInfoNomina()
+
+            if (len(conciSAT.wriErr.mensajesErr) == 0):
+                conciSAT.recorreResDiariosSATIcaav()
+            if len(conciSAT.wriErr.mensajesErr) > 0:
+                getMessages(request, conciSAT.wriErr.mensajesErr)
+                return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+
+            else:
+                ###Por último muestro resultado
+                ### con HttpResponseRedirect evito que se de doble click y se vuelva a ejecutar
+                ### con reverse recontruyo la URL
+                guardaActuArch(tipoNombre, agencia + "-" + ano+ "-" + str(meses), "concilio", request)
+                status = "ok"
+                messages.success(request, "La conciliación se ejecuto correctamente!")
+                #1#mf = ManageFiles.ManageFiles()
+                #1#filePath = dirConc + subFolder + fecha[8:] + "/" + agencia + "/"
+                #1#fileName = agencia + fecha[:4] + fecha[5:7] + fecha[8:]
+                #1#nombreZip = mf.createZip(filePath, dirConc, fileName)
+                #1#fsock = open(dirConc + nombreZip, "rb")
+                #1#response = HttpResponse(fsock, content_type='application/zip')
+                #1#response['Content-Disposition'] = 'attachment; filename=' + fileName + '.zip'
+                #1#return response
+                return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+        elif ('bajaArchivo' == str(request.POST.getlist('boton')[0]) or 'subeArchivo' == str(request.POST.getlist('boton')[0])):
+            return subirArchivoCon(request, tipoNombre, status)
+        else:
+            return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
