@@ -566,6 +566,8 @@ def conciliaSAT(request, tipoNombre, status):
 
                 fsock = open(filePath, "rb")
                 response = HttpResponse(fsock, content_type='application/force-download')
+                print(filePath)
+                print("ok aqui estoy")
                 newFileName  = filePath.split("/" + agencia + '/')[2].strip()
                 response['Content-Disposition'] = 'attachment; filename=' + newFileName
                 status = "Conciliado"
