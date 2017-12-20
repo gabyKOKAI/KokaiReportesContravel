@@ -460,7 +460,6 @@ def conciliaBancos(request, tipoNombre, status):
         variables = {}
         ##print(str(request.POST.getlist('CBAgencia')))
         agencia = str(request.POST.getlist('CBAgencia')[0])
-        newFileName = regresaFileNameConc(request, agencia)
         fecha = str(request.POST.getlist('DATEreportes')[0])
         if (fecha == ''):
             fecha = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -553,7 +552,7 @@ def conciliaSAT(request, tipoNombre, status):
             conciSAT.extractInfoNomina()
 
             if (len(conciSAT.wriErr.mensajesErr) == 0):
-                conciSAT.recorreResDiariosSATIcaav()
+                filePath = conciSAT.recorreResDiariosSATIcaav()
             if len(conciSAT.wriErr.mensajesErr) > 0:
                 getMessages(request, conciSAT.wriErr.mensajesErr)
                 return HttpResponseRedirect(
@@ -564,16 +563,14 @@ def conciliaSAT(request, tipoNombre, status):
                 ### con HttpResponseRedirect evito que se de doble click y se vuelva a ejecutar
                 ### con reverse recontruyo la URL
                 guardaActuArch(tipoNombre, agencia + "-" + ano+ "-" + str(meses), "concilio", request)
-                status = "ok"
+
+                fsock = open(filePath, "rb")
+                response = HttpResponse(fsock, content_type='application/force-download')
+                newFileName  = filePath.split(agencia + '/')[2].strip()
+                response['Content-Disposition'] = 'attachment; filename=' + newFileName
+                status = "Conciliado"
                 messages.success(request, "La conciliación se ejecuto correctamente!")
-                #1#mf = ManageFiles.ManageFiles()
-                #1#filePath = dirConc + subFolder + fecha[8:] + "/" + agencia + "/"
-                #1#fileName = agencia + fecha[:4] + fecha[5:7] + fecha[8:]
-                #1#nombreZip = mf.createZip(filePath, dirConc, fileName)
-                #1#fsock = open(dirConc + nombreZip, "rb")
-                #1#response = HttpResponse(fsock, content_type='application/zip')
-                #1#response['Content-Disposition'] = 'attachment; filename=' + fileName + '.zip'
-                #1#return response
+                return response
                 return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
         elif ('bajaArchivo' == str(request.POST.getlist('boton')[0]) or 'subeArchivo' == str(request.POST.getlist('boton')[0])):
             return subirArchivoCon(request, tipoNombre, status)
