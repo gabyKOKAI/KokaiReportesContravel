@@ -573,7 +573,7 @@ def conciliaSAT(request, tipoNombre, status):
                 newFileName  = filePath.split("/" + agencia + '/')[1].strip()
                 response['Content-Disposition'] = 'attachment; filename=' + newFileName
                 status = "Conciliado"
-                messages.success(request, "La conciliación se ejecuto correctamente!")
+                ##messages.success(request, "La conciliación se ejecuto correctamente!")
                 return response
                 ##return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
         elif ('bajaArchivo' == str(request.POST.getlist('boton')[0]) or 'subeArchivo' == str(request.POST.getlist('boton')[0])):
