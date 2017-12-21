@@ -550,6 +550,7 @@ def conciliaSAT(request, tipoNombre, status):
             conciSAT.extractInfoDiarios()
             conciSAT.extractInfoSAT()
             conciSAT.extractInfoNomina()
+            getMessages(request, conciSAT.wriErr.mensajesErr)
 
             if (len(conciSAT.wriErr.mensajesErr) == 0):
                 filePath = conciSAT.recorreResDiariosSATIcaav()
@@ -572,7 +573,7 @@ def conciliaSAT(request, tipoNombre, status):
                 response['Content-Disposition'] = 'attachment; filename=' + newFileName
                 status = "Conciliado"
                 messages.success(request, "La conciliación se ejecuto correctamente!")
-                return response
+                ##return response
                 return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
         elif ('bajaArchivo' == str(request.POST.getlist('boton')[0]) or 'subeArchivo' == str(request.POST.getlist('boton')[0])):
             return subirArchivoCon(request, tipoNombre, status)
