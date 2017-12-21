@@ -415,7 +415,7 @@ def descargarRepCXC(request, tipoNombre, pk):
     return response
 
 @login_required
-@permission_required('reportesVC.can_run_Conciliacion')
+@permission_required('reportesVC.can_run_Calculos')
 def ejecutaComisiones(request, tipoNombre, status):
     variables = {}
 
