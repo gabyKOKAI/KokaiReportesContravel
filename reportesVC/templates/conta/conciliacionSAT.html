@@ -15,6 +15,7 @@
         <div class="col-sm-11">
                <br>
                 <form action="{% url 'reportesVC:conciliaSAT' tipoNombre=tipo_nombre status='ejecutando'%}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
                     <div class="row">
                         <div class="col-sm-6 text-left">
                             <p>Selecciona Meses:</p>
@@ -51,7 +52,7 @@
                             Año 2 digitos: <input class="textFormSmall" type="text" name="InpAno"  maxlength="2"/>
                         </div>
                      </div>
-                    {% csrf_token %}
+
 
                     <div class="row">
                         <div class="col-sm-6 text-right"></div>

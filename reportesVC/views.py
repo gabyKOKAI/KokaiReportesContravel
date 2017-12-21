@@ -568,14 +568,14 @@ def conciliaSAT(request, tipoNombre, status):
 
                 fsock = open(filePath, "rb")
                 response = HttpResponse(fsock, content_type='application/force-download')
-                print(filePath)
-                print("ok aqui estoy")
+                ##print(filePath)
+                ##print("ok aqui estoy")
                 newFileName  = filePath.split("/" + agencia + '/')[1].strip()
                 response['Content-Disposition'] = 'attachment; filename=' + newFileName
                 status = "Conciliado"
                 messages.success(request, "La conciliación se ejecuto correctamente!")
-                ##return response
-                return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+                return response
+                ##return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
         elif ('bajaArchivo' == str(request.POST.getlist('boton')[0]) or 'subeArchivo' == str(request.POST.getlist('boton')[0])):
             return subirArchivoCon(request, tipoNombre, status)
         else:
