@@ -550,11 +550,12 @@ def conciliaSAT(request, tipoNombre, status):
             conciSAT.extractInfoDiarios()
             conciSAT.extractInfoSAT()
             conciSAT.extractInfoNomina()
-            getMessages(request, conciSAT.wriErr.mensajesErr)
 
             if (len(conciSAT.wriErr.mensajesErr) == 0):
                 filePath = conciSAT.recorreResDiariosSATIcaav()
             if len(conciSAT.wriErr.mensajesErr) > 0:
+                print("entre aqui errores!!!")
+                print(str(conciSAT.wriErr.mensajesErr))
                 getMessages(request, conciSAT.wriErr.mensajesErr)
                 return HttpResponseRedirect(
                     reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
