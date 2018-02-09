@@ -1,0 +1,76 @@
+{% extends '../base.html' %}
+{% load bootstrap3 %}
+
+{% block tituloPagina %}
+    Página de ejecucion de conciliacion [{{tipo_nombre_largo}}]
+{% endblock %}
+
+{% block HeaderPagina %}
+    Página de ejecucion de conciliacion [{{tipo_nombre_largo}}]
+{% endblock %}
+
+{% block content %}
+     <div class="row textoBlanco">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-11">
+               <br>
+                <form action="{% url 'reportesVC:conciliaIngresos' tipoNombre=tipo_nombre status='ejecutando'%}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-6 text-right"></div>
+                        <div class="col-sm-6 text-left">
+                            <button class="submitForm" type="submit" name="boton" value="conciliar">{% bootstrap_icon "star" %} Conciliar</button>
+                        </div>
+                    </div>
+                <form action="{{ request.build_absolute_uri }}subirArchivoCon/" method="post" enctype="multipart/form-data" class="form">
+                    {% csrf_token %}
+                     <div class="row">
+                        <div class="col-sm-3 text-left">
+                            <p>Selecciona Agencia:</p>
+                            <ul class="listaArchivos">
+                                <li><input type="radio" name="CBAgencia" value="Contravel" checked="checked" title="Text to show">Contravel
+                                </li>
+                                <li><input type="radio" name="CBAgencia" value="VK">Viajes Kokai
+                                </li>
+                                <li><input type="radio" name="CBAgencia" value="Otra">Otra
+                                </li>
+                            </ul>
+                        </div>
+                         <div class="col-sm-9 text-left">
+                             <p>Selecciona fecha:</p>
+                             <input id="currentDate" class="calendario" type="date" name="DATEreportes" />
+                        </div>
+                    </div>
+                    <p>Subir o sustituir los archivos de configuración:</p>
+                    <div class="row">
+                        <div class="col-sm-12 text-left">
+                        <ul class="listaArchivos">
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoVentas" title="Text to show">Archivo Ventas.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesConfCliAL');">+/-</span>
+                                <div class="detalles" id="detallesConfCliAL">En el archivo del mes a conciliar se deben o pueden meter todos los meses de ventas que se deseen para que los ingresos localicen todas las ventas. Las columnas deben llevar este orden: [datos_factura_id_cliente|datos_factura_id_serie|datos_factura_fac_numero|detalle_factura_nom_pasajero|detalle_factura_numero_bol|detalle_factura_concepto|forma_pago|detalle_factura_tarifa_mon_base|iva|tua|otros|detalle_factura_descuento|detalle_factura_iva_desc|datos_factura_fecha|sucursales_cve|datos_factura_id_sucursal|proveedores_id_tipo_proveedor|datos_factura_id_stat|datos_factura_cl_nombre|id_unidad_negocio|id_oriven] en formato CSV sin comas y sin titulos.</div>
+                            </li>
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoDiarios" checked="checked">Diario de ICAAV.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesArchivo');">+/-</span>
+                                <div class="detalles" id="detallesArchivo">Archivo diario de ICAAV en formato CSV sin comas y sin titulos.
+                                Las columnas deben llevar este orden: [datos_poliza_id_sucursal|datos_poliza_anio|datos_poliza_mes|datos_poliza_tipo|datos_poliza_num_poliza|datos_poliza_fecha|datos_poliza_concepto|datos_poliza_estatus|datos_poliza_id_stat|datos_poliza_fecha_mod|detalle_poliza_id_sucursal|detalle_poliza_anio|detalle_poliza_mes|detalle_poliza_tipo|detalle_poliza_num_poliza|detalle_poliza_movimiento|detalle_poliza_cuen_num_cuenta|detalle_poliza_referencia|detalle_poliza_concepto_mov|detalle_poliza_tipo_cambio|detalle_poliza_cargo|detalle_poliza_abono|detalle_poliza_documento|detalle_poliza_id_serie|detalle_poliza_fac_numero|detalle_poliza_id_proveedor|detalle_poliza_numero_bol|detalle_poliza_origen|detalle_poliza_id_stat|detalle_poliza_fecha_mod|cuentas_contab_nombre_cta|sucursales_cve|detalle_poliza_uuid|folio_cheque] en formato CSV sin comas y sin titulos.</div>
+                            </li>
+
+                        </ul>
+                         </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6 text-right">
+                            <input type="file" name="myfile">
+                        </div>
+                        <div class="col-sm-6 text-left">
+                            <button class="submitForm" type="submit" name="boton" value="subeArchivo">{% bootstrap_icon "star" %}Sube Archivo</button>
+                        </div>
+                    </div>
+                </form>
+                </form>
+
+
+      </div>
+    </div>
+{% endblock %}
