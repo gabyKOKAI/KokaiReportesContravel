@@ -611,7 +611,7 @@ def conciliaIngresos(request, tipoNombre, status):
                 ano = datetime.datetime.today().strftime('%y')
                 meses.append(int(datetime.datetime.today().strftime('%m')))
             else:
-                ano = int(fecha[2:4])
+                ano = fecha[2:4]
                 meses.append(int(fecha[5:7]))
             print("ano: " + str(ano))
             print("mes: " + str(meses))
