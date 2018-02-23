@@ -100,6 +100,14 @@ def conciliacionSAT(request, tipoNombre, status):
                   {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
                     'status': status})
 
+@login_required
+@permission_required('reportesVC.can_run_Conciliacion')
+def conciliacionIngresos(request, tipoNombre, status):
+    tipo = TipoReporte.objects.get(nombre=tipoNombre)
+    return render(request, 'conta/conciliacionIngresos.html',
+                  {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
+                    'status': status})
+
 '''
 ### Used before
 def reporteVentas0(request, reporte_id):
@@ -339,6 +347,8 @@ def regresaFileNameConc(request, agencia):
             newFileName = "SAT " + agencia + ".csv"
         elif 'archivoNomina' in mylist:
             newFileName = "Nomina " + agencia + ".csv"
+        elif 'archivoVentas' in mylist:
+            newFileName = "Ventas " + agencia + ".csv"
     return newFileName
 
 @login_required
@@ -365,6 +375,9 @@ def subirArchivoCon(request, tipoNombre, status):
         elif "Bancos" in tipoNombre:
             return HttpResponseRedirect(
                     reverse('reportesVC:conciliacionBancos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+        elif "Ingresos" in tipoNombre:
+            return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionIngresos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
     elif 'bajaArchivo' == str(request.POST.getlist('boton')[0]):
         fileName = dirArchivos + tipoNombre + "/" + subFolder + newFileName
         response = bajarArch(request, fileName , newFileName)
@@ -378,6 +391,9 @@ def subirArchivoCon(request, tipoNombre, status):
             elif "Bancos" in tipoNombre:
                 return HttpResponseRedirect(
                     reverse('reportesVC:conciliacionBancos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+            elif "Ingresos" in tipoNombre:
+                return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionIngresos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
         return response
     else:
         messages.warning(request, "No dio click en ninguna opción valida")
@@ -415,7 +431,7 @@ def descargarRepCXC(request, tipoNombre, pk):
     return response
 
 @login_required
-@permission_required('reportesVC.can_run_Conciliacion')
+@permission_required('reportesVC.can_run_Calculos')
 def ejecutaComisiones(request, tipoNombre, status):
     variables = {}
 
@@ -460,7 +476,6 @@ def conciliaBancos(request, tipoNombre, status):
         variables = {}
         ##print(str(request.POST.getlist('CBAgencia')))
         agencia = str(request.POST.getlist('CBAgencia')[0])
-        newFileName = regresaFileNameConc(request, agencia)
         fecha = str(request.POST.getlist('DATEreportes')[0])
         if (fecha == ''):
             fecha = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -531,7 +546,6 @@ def conciliaSAT(request, tipoNombre, status):
             variables = {}
             ##print(str(request.POST.getlist('CBAgencia')))
             agencia = str(request.POST.getlist('CBAgencia')[0])
-            newFileName = regresaFileNameConc(request, agencia)
             ano = str(request.POST.getlist('InpAno')[0])
             if (ano == ''):
                 ano = datetime.datetime.today().strftime('%y')
@@ -553,8 +567,10 @@ def conciliaSAT(request, tipoNombre, status):
             conciSAT.extractInfoNomina()
 
             if (len(conciSAT.wriErr.mensajesErr) == 0):
-                conciSAT.recorreResDiariosSATIcaav()
+                filePath = conciSAT.recorreResDiariosSATIcaav()
             if len(conciSAT.wriErr.mensajesErr) > 0:
+                print("entre aqui errores!!!")
+                print(str(conciSAT.wriErr.mensajesErr))
                 getMessages(request, conciSAT.wriErr.mensajesErr)
                 return HttpResponseRedirect(
                     reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
@@ -564,18 +580,76 @@ def conciliaSAT(request, tipoNombre, status):
                 ### con HttpResponseRedirect evito que se de doble click y se vuelva a ejecutar
                 ### con reverse recontruyo la URL
                 guardaActuArch(tipoNombre, agencia + "-" + ano+ "-" + str(meses), "concilio", request)
-                status = "ok"
-                messages.success(request, "La conciliación se ejecuto correctamente!")
-                #1#mf = ManageFiles.ManageFiles()
-                #1#filePath = dirConc + subFolder + fecha[8:] + "/" + agencia + "/"
-                #1#fileName = agencia + fecha[:4] + fecha[5:7] + fecha[8:]
-                #1#nombreZip = mf.createZip(filePath, dirConc, fileName)
-                #1#fsock = open(dirConc + nombreZip, "rb")
-                #1#response = HttpResponse(fsock, content_type='application/zip')
-                #1#response['Content-Disposition'] = 'attachment; filename=' + fileName + '.zip'
-                #1#return response
-                return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+
+                fsock = open(filePath, "rb")
+                response = HttpResponse(fsock, content_type='application/force-download')
+                ##print(filePath)
+                ##print("ok aqui estoy")
+                newFileName  = filePath.split("/" + agencia + '/')[1].strip()
+                response['Content-Disposition'] = 'attachment; filename=' + newFileName
+                status = "Conciliado"
+                ##messages.success(request, "La conciliación se ejecuto correctamente!")
+                return response
+                ##return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
         elif ('bajaArchivo' == str(request.POST.getlist('boton')[0]) or 'subeArchivo' == str(request.POST.getlist('boton')[0])):
             return subirArchivoCon(request, tipoNombre, status)
         else:
             return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+
+@login_required
+@permission_required('reportesVC.can_run_Conciliacion')
+def conciliaIngresos(request, tipoNombre, status):
+        if 'conciliar' == str(request.POST.getlist('boton')[0]):
+            ##print("entre")
+            variables = {}
+            ##print(str(request.POST.getlist('CBAgencia')))
+            agencia = str(request.POST.getlist('CBAgencia')[0])
+            fecha = str(request.POST.getlist('DATEreportes')[0])
+            meses = []
+            if (fecha == ''):
+                fecha = datetime.datetime.today().strftime('%Y-%m-%d')
+                ano = datetime.datetime.today().strftime('%y')
+                meses.append(int(datetime.datetime.today().strftime('%m')))
+            else:
+                ano = fecha[2:4]
+                meses.append(int(fecha[5:7]))
+            print("ano: " + str(ano))
+            print("mes: " + str(meses))
+
+            ###Ejecuto reporte
+            dirConc = dirArchivos + tipoNombre + "/"
+            conciIngresos = ConciliadorSAT(agencia, dirConc, meses,ano)
+
+            ### Conciliacion SAT/ICAAV/Ingresos
+            conciIngresos.extractInfoDiariosIngresos()
+            conciIngresos.extractInfoVentas()
+
+            if (len(conciIngresos.wriErr.mensajesErr) == 0):
+                filePath = conciIngresos.recorreResDiariosVentas()
+            if len(conciIngresos.wriErr.mensajesErr) > 0:
+                print("entre aqui errores!!!")
+                print(str(conciIngresos.wriErr.mensajesErr))
+                getMessages(request, conciIngresos.wriErr.mensajesErr)
+                return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionIngresos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+
+            else:
+                ###Por último muestro resultado
+                ### con HttpResponseRedirect evito que se de doble click y se vuelva a ejecutar
+                ### con reverse recontruyo la URL
+                guardaActuArch(tipoNombre, agencia + "-" + ano+ "-" + str(meses), "concilio", request)
+
+                fsock = open(filePath, "rb")
+                response = HttpResponse(fsock, content_type='application/force-download')
+                ##print(filePath)
+                ##print("ok aqui estoy")
+                newFileName  = filePath.split("/" + agencia + '/')[1].strip()
+                response['Content-Disposition'] = 'attachment; filename=' + newFileName
+                status = "Conciliado"
+                ##messages.success(request, "La conciliación se ejecuto correctamente!")
+                return response
+                ##return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+        elif ('bajaArchivo' == str(request.POST.getlist('boton')[0]) or 'subeArchivo' == str(request.POST.getlist('boton')[0])):
+            return subirArchivoCon(request, tipoNombre, status)
+        else:
+            return HttpResponseRedirect(reverse('reportesVC:conciliacionIngresos', kwargs={'tipoNombre': tipoNombre, 'status': status}))

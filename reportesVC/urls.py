@@ -31,4 +31,6 @@ urlpatterns = [
     url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/subirArchivoCon/$', views.subirArchivoCon, name='subirArchivoCon'),
     url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliacionSAT$', views.conciliacionSAT, name='conciliacionSAT'),
     url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliaSAT/$', views.conciliaSAT, name='conciliaSAT'),
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliacionIngresos$', views.conciliacionIngresos, name='conciliacionIngresos'),
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliaIngresos/$', views.conciliaIngresos, name='conciliaIngresos'),
 ]

@@ -51,7 +51,11 @@ conciliaciones_children = (
              weight=20,
              icon="report",
              separator=True),
-
+    MenuItem("Ingresos",
+             reverse('reportesVC:conciliacionIngresos', kwargs={'tipoNombre': 'concIngresos', 'status': 'Nuevo'}),
+             weight=20,
+             icon="report",
+             separator=True),
 )
 
 
