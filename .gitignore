@@ -56,4 +56,4 @@ db.sqlite3
 *.csv
 *.xlsx
 *.xls
-*.cpython-35.pyc
+*.pyc
