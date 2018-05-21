@@ -65,15 +65,3 @@ class ActualizacionesArchivos(models.Model):
     estatus=  models.CharField(max_length=10, default='')
     fechaEjecucion = models.DateTimeField('Fecha de ejecucion',auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1,on_delete=models.CASCADE)
-
-class Compania(models.Model):
-    def __str__(self):
-        return str(self.id) + ": " + self.nombre
-    nombre = models.CharField(max_length=255, blank=True)
-
-class CompaniaUsuario(models.Model):
-    def __str__(self):
-        return str(self.id) + ": " + self.user.nombre + "-" + self.compania.nombre
-
-    compania = models.ForeignKey(Compania, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1, on_delete=models.CASCADE)
