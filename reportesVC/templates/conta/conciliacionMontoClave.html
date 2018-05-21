@@ -1,0 +1,54 @@
+{% extends '../base.html' %}
+{% load bootstrap3 %}
+
+{% block HeaderPagina %}
+    Página de ejecucion de conciliacion [{{tipo_nombre_largo}}]
+{% endblock %}
+
+{% block content %}
+     <div class="row textoBlanco">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-11">
+               <br>
+                <form action="{% url 'reportesVC:conciliaMontoClave' tipoNombre=tipo_nombre status='ejecutando'%}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-6 text-right"></div>
+                        <div class="col-sm-6 text-left">
+                            <button class="submitForm" type="submit" name="boton" value="conciliar">{% bootstrap_icon "star" %} Conciliar</button>
+                        </div>
+                    </div>
+                <form action="{{ request.build_absolute_uri }}subirArchivoCon/" method="post" enctype="multipart/form-data" class="form">
+                    {% csrf_token %}
+                    <p>Subir o sustituir los archivos de configuración:</p>
+                    <div class="row">
+                        <div class="col-sm-12 text-left">
+                        <ul class="listaArchivos">
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoBase" title="Text to show">Archivo Base.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesConfCliAL');">+/-</span>
+                                <div class="detalles" id="detallesConfCliAL">En el archivo base a conciliar se deben o pueden meter todos los meses que se deseen. Las columnas deben llevar este orden: [monto|clave|dato1|dato2|dato3|dato4|dato5|dato6|dato7|dato8|dato9|dato10|dato11|dato12|dato13|dato14|dato15] en formato CSV sin comas y sin titulos.</div>
+                            </li>
+                            <li><input type="radio" name="CBtipoArchivo" value="archivoAConciliar" checked="checked">Archivo a Conciliar.
+                                <span class="masDetalle" onclick="toggle_visibility('detallesArchivo');">+/-</span>
+                                <div class="detalles" id="detallesArchivo">En el archivo para conciliar se deben o pueden meter todos los meses que se deseen. Las columnas deben llevar este orden: [monto|clave|dato1|dato2|dato3|dato4|dato5|dato6|dato7|dato8|dato9|dato10|dato11|dato12|dato13|dato14|dato15] en formato CSV sin comas y sin titulos.</div>
+                            </li>
+
+                        </ul>
+                         </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6 text-right">
+                            <input type="file" name="myfile">
+                        </div>
+                        <div class="col-sm-6 text-left">
+                            <button class="submitForm" type="submit" name="boton" value="subeArchivo">{% bootstrap_icon "star" %}Sube Archivo</button>
+                        </div>
+                    </div>
+                </form>
+                </form>
+
+
+      </div>
+    </div>
+{% endblock %}

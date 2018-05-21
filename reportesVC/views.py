@@ -108,6 +108,14 @@ def conciliacionIngresos(request, tipoNombre, status):
                   {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
                     'status': status})
 
+@login_required
+@permission_required('reportesVC.can_run_Conciliacion')
+def conciliacionMontoClave(request, tipoNombre, status):
+    tipo = TipoReporte.objects.get(nombre=tipoNombre)
+    return render(request, 'conta/conciliacionMontoClave.html',
+                  {'tipo_nombre': tipoNombre, 'tipo_valor': tipo.id, 'tipo_nombre_largo': tipo.nombreLargo,
+                    'status': status})
+
 '''
 ### Used before
 def reporteVentas0(request, reporte_id):
@@ -349,6 +357,10 @@ def regresaFileNameConc(request, agencia):
             newFileName = "Nomina " + agencia + ".csv"
         elif 'archivoVentas' in mylist:
             newFileName = "Ventas " + agencia + ".csv"
+        elif 'archivoBase' in mylist:
+            newFileName = "Base " + agencia + ".csv"
+        elif 'archivoAConciliar' in mylist:
+            newFileName = "AConciliar " + agencia + ".csv"
     return newFileName
 
 @login_required
@@ -356,13 +368,17 @@ def regresaFileNameConc(request, agencia):
 def subirArchivoCon(request, tipoNombre, status):
     status = "Error"
     if request.method == 'POST':
-        agencia = str(request.POST.getlist('CBAgencia')[0])
+        if "MontoClave" not in tipoNombre:
+            agencia = str(request.POST.getlist('CBAgencia')[0])
+            fecha = str(request.POST.getlist('DATEreportes')[0])
+            if (fecha == ''):
+                fecha = datetime.datetime.today().strftime('%Y-%m-%d')
+                ##print("fecha" + fecha)
+            subFolder = fecha[2:4] + "-" + fecha[5:7] + "/"
+        else:
+            agencia = str(request.user);
+            subFolder = ""
         newFileName = regresaFileNameConc(request, agencia)
-        fecha = str(request.POST.getlist('DATEreportes')[0])
-        if (fecha == ''):
-            fecha = datetime.datetime.today().strftime('%Y-%m-%d')
-            ##print("fecha" + fecha)
-        subFolder =  fecha[2:4] + "-" + fecha[5:7] + "/"
 
     if 'subeArchivo' == str(request.POST.getlist('boton')[0]):
         fileName = subirArch(request, newFileName, tipoNombre, subFolder)
@@ -378,6 +394,9 @@ def subirArchivoCon(request, tipoNombre, status):
         elif "Ingresos" in tipoNombre:
             return HttpResponseRedirect(
                     reverse('reportesVC:conciliacionIngresos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+        elif "MontoClave" in tipoNombre:
+            return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionMontoClave', kwargs={'tipoNombre': tipoNombre, 'status': status}))
     elif 'bajaArchivo' == str(request.POST.getlist('boton')[0]):
         fileName = dirArchivos + tipoNombre + "/" + subFolder + newFileName
         response = bajarArch(request, fileName , newFileName)
@@ -394,6 +413,9 @@ def subirArchivoCon(request, tipoNombre, status):
             elif "Ingresos" in tipoNombre:
                 return HttpResponseRedirect(
                     reverse('reportesVC:conciliacionIngresos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+            elif "MontoClave" in tipoNombre:
+                return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionMontoClave', kwargs={'tipoNombre': tipoNombre, 'status': status}))
         return response
     else:
         messages.warning(request, "No dio click en ninguna opción valida")
@@ -653,3 +675,50 @@ def conciliaIngresos(request, tipoNombre, status):
             return subirArchivoCon(request, tipoNombre, status)
         else:
             return HttpResponseRedirect(reverse('reportesVC:conciliacionIngresos', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+
+@login_required
+@permission_required('reportesVC.can_run_Conciliacion')
+def conciliaMontoClave(request, tipoNombre, status):
+        if 'conciliar' == str(request.POST.getlist('boton')[0]):
+            ##print("entre")
+            variables = {}
+            ##print(str(request.POST.getlist('CBAgencia')))
+            agencia = str(request.user)
+            ##fecha = str(request.POST.getlist('DATEreportes')[0])
+            fecha = datetime.datetime.today().strftime('%Y-%m-%d')
+
+            ###Ejecuto reporte
+            subFolder = "" ##fecha[2:4] + "-" + fecha[5:7] + "/"
+            dirConc = dirArchivos + tipoNombre + "/"
+            conci = Conciliador(agencia, fecha, dirConc, subFolder)
+
+            ### Conciliacion
+            conci.extractInfoArchivoMontoClave()
+
+            if (len(conci.wriErr.mensajesErr) == 0):
+                filePath = conci.recorreResMontoClave()
+            if len(conci.wriErr.mensajesErr) > 0:
+                print(str(conci.wriErr.mensajesErr))
+                getMessages(request, conci.wriErr.mensajesErr)
+                return HttpResponseRedirect(
+                    reverse('reportesVC:conciliacionMontoClave', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+
+            else:
+                ###Por último muestro resultado
+                ### con HttpResponseRedirect evito que se de doble click y se vuelva a ejecutar
+                ### con reverse recontruyo la URL
+                guardaActuArch(tipoNombre, agencia, "concilioMC", request)
+                fsock = open(filePath, "rb")
+                response = HttpResponse(fsock, content_type='application/force-download')
+                ##print(filePath)
+                ##print("ok aqui estoy")
+                newFileName  = filePath.split("/" + agencia)[1].strip()
+                response['Content-Disposition'] = 'attachment; filename=' + newFileName
+                status = "Conciliado"
+                ##messages.success(request, "La conciliación se ejecuto correctamente!")
+                return response
+                ##return HttpResponseRedirect(reverse('reportesVC:conciliacionSAT', kwargs={'tipoNombre': tipoNombre, 'status': status}))
+        elif ('bajaArchivo' == str(request.POST.getlist('boton')[0]) or 'subeArchivo' == str(request.POST.getlist('boton')[0])):
+            return subirArchivoCon(request, tipoNombre, status)
+        else:
+            return HttpResponseRedirect(reverse('reportesVC:conciliacionMontoClave', kwargs={'tipoNombre': tipoNombre, 'status': status}))

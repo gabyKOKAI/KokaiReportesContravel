@@ -56,6 +56,11 @@ conciliaciones_children = (
              weight=20,
              icon="report",
              separator=True),
+    MenuItem("Monto-Clave",
+             reverse('reportesVC:conciliacionMontoClave', kwargs={'tipoNombre': 'concMontoClave', 'status': 'Nuevo'}),
+             weight=20,
+             icon="report",
+             separator=True),
 )
 
 

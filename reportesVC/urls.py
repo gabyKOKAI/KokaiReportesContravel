@@ -33,4 +33,6 @@ urlpatterns = [
     url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliaSAT/$', views.conciliaSAT, name='conciliaSAT'),
     url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliacionIngresos$', views.conciliacionIngresos, name='conciliacionIngresos'),
     url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliaIngresos/$', views.conciliaIngresos, name='conciliaIngresos'),
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliacionMontoClave$', views.conciliacionMontoClave, name='conciliacionMontoClave'),
+    url(r'^con(?P<tipoNombre>[\w]+)/st(?P<status>[\w]+)/conciliaMontoClave/$', views.conciliaMontoClave, name='conciliaMontoClave'),
 ]
