@@ -14,7 +14,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>{% block tituloPagina %}{% endblock %}</title>
+    <title>{% block tituloPagina %}Contravel Desarrollo Kokai Web{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="{% static 'reportesVC/DT_bootstrap.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'reportesVC/style.css' %}" />
@@ -22,6 +22,7 @@
 
 </head>
 <body>
+
     {% block menuu %}
         {% generate_menu %}
         {% with menu=menus.main %}
