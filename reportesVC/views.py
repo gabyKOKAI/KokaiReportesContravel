@@ -29,6 +29,7 @@ dirArchivos = "/home/kokaiweb/vep35/reportesContravel/reportesContravel/reportes
 ###desarrollo
 ##dirArchivos = "reportesContravel/reportesVC/archivos/"
 
+
 # Create your views here.
 
 class ReporteView(generic.DetailView):
